@@ -62,7 +62,10 @@ for workflow, workflow_data in WORKFLOWS.items():
 
   #Read the transcriptions (using our knowledge about the workflows)
   for (page, annotations) in pages:
-    print(f'Page: {page["page"]}')
-    if annotations[CONTROL]['value'] == 'Other page':
-      print('OTHER')
+    if(workflow == 'Index'):
+      print(f'Page: {page["page"]}')
+      if annotations[CONTROL]['value'] == 'Other page':
+        print('OTHER')
+    else:
+      exit(f'Bad workflow: "{workflow}"')
 
