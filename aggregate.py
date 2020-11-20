@@ -63,7 +63,7 @@ for workflow, workflow_data in WORKFLOWS.items():
   #Read the transcriptions (using our knowledge about the workflows)
   for (page, annotations) in pages:
     if(workflow == 'Index'):
-      print(f'Page: {page["page"]}')
+      print(f'* Page: {page["page"]}')
       if annotations[CONTROL]['value'] == 'Other page':
         tasks = workflow_data['other']
         print(annotations[1]['value'])
@@ -71,6 +71,7 @@ for workflow, workflow_data in WORKFLOWS.items():
         tasks = workflow_data['names']
       elif annotations[CONTROL]['value'] == 'Blank page': continue
       else: exit(f"Bad control switch: \"{annotations[CONTROL]['value']}\"")
+      print()
     else:
       exit(f'Bad workflow: "{workflow}"')
 
