@@ -64,12 +64,13 @@ for workflow, workflow_data in WORKFLOWS.items():
   for (page, annotations) in pages:
     if workflow == 'Index':
       print(f'* Page: {page["page"]}')
-      if annotations[CONTROL]['value'] == 'Other page':
+      control = annotations[CONTROL]['value']
+      if control == 'Other page':
         tasks = workflow_data['other']
         print(annotations[1]['value'])
-      elif annotations[CONTROL]['value'] == 'Name list':
+      elif control == 'Name list':
         tasks = workflow_data['names']
-      elif annotations[CONTROL]['value'] == 'Blank page': continue
+      elif control == 'Blank page': continue
       else: exit(f"Bad control switch: \"{annotations[CONTROL]['value']}\"")
       print()
     else:
