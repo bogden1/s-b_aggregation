@@ -70,7 +70,10 @@ for workflow, workflow_data in WORKFLOWS.items():
         print(annotations[1]['value'])
       elif control == 'Name list':
         tasks = workflow_data['names']
-      elif control == 'Blank page': continue
+        ##TODO
+      elif control == 'Blank page':
+        print('BLANK')
+        continue
       else: exit(f"Bad control switch: \"{annotations[CONTROL]['value']}\"")
       print()
     else:
