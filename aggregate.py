@@ -62,7 +62,7 @@ for workflow, workflow_data in WORKFLOWS.items():
 
   #Read the transcriptions (using our knowledge about the workflows)
   for (page, annotations) in pages:
-    if(workflow == 'Index'):
+    if workflow == 'Index':
       print(f'* Page: {page["page"]}')
       if annotations[CONTROL]['value'] == 'Other page':
         tasks = workflow_data['other']
