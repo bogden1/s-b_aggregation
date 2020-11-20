@@ -48,12 +48,21 @@ for workflow, workflow_data in WORKFLOWS.items():
 
   workflow_classifications = classifications.loc[(classifications['workflow_id'] == workflow_data['id']) &
                                                  (classifications['workflow_version'] == workflow_data['version'])]
-  
-  #Read the transcriptions (using our knowledge about the workflows)
-  pages = [json.loads(x) for x in workflow_classifications['annotations']]
+
+  #Read the annotations into an array of (subject_data, annotation) tuples
+  pages = [ (
+              next(iter(json.loads(row['subject_data']).values())), #Load a dict from the subject_data JSON, then drop the key,
+                                                                    #leaving only the dict that the key pointed to (there is only
+                                                                    #ever one value in these dicts)
+              json.loads(row['annotations'])
+            )
+            for index, row in workflow_classifications.iterrows() ]
+
   if args.dump: print(json.dumps(pages, indent=2))
-  for annotations in pages:
-    print(f'Page: ')
+
+  #Read the transcriptions (using our knowledge about the workflows)
+  for (page, annotations) in pages:
+    print(f'Page: {page["page"]}')
     if annotations[CONTROL]['value'] == 'Other page':
       print('OTHER')
 
