@@ -8,13 +8,12 @@ import sys
 
 import pandas as pd
 
-CONTROL = 0 #Index of main control question determining which workflow we branch into
-
 WORKFLOWS = {
  'Index': {
     'id': 16866,
     'version': 11.28,
     'control': 'T20',
+    'skip': [ 'T0', 'T11', 'T15'], #Tasks in this workflow that we do not process any data for (combos, control flow)
     'other': {
       'Heading': 'T12',
       'Subject': ['T13', 'T16', 'T18'],
@@ -64,10 +63,18 @@ for workflow, workflow_data in WORKFLOWS.items():
   for (page, annotations) in pages:
     if workflow == 'Index':
       print(f'* Page: {page["page"]}')
-      control = annotations[CONTROL]['value']
+      control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
       if control == 'Other page':
         tasks = workflow_data['other']
-        print(annotations[1]['value'])
+        for annotation in annotations:
+          task = annotation['task']
+          value = annotation['value']
+          if task == tasks['Heading']: print(value)
+          elif task in tasks['Subject']: print(f'  {value}', end = '')
+          elif task in tasks['Pages']: print(value)
+          elif task == workflow_data['comments']: print(f'Comments: {value}')
+          elif task in workflow_data['skip']: continue
+          else: exit(f'Unknown task: {task}\nValue: {value}')
       elif control == 'Name list':
         tasks = workflow_data['names']
         ##TODO
