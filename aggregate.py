@@ -74,7 +74,7 @@ for workflow, workflow_data in WORKFLOWS.items():
       elif control == 'Blank page':
         print('BLANK')
         continue
-      else: exit(f"Bad control switch: \"{annotations[CONTROL]['value']}\"")
+      else: exit(f"Bad control switch: \"{control}\"")
       print()
     else:
       exit(f'Bad workflow: "{workflow}"')
