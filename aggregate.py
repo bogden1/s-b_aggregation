@@ -23,6 +23,15 @@ WORKFLOWS = {
   },
 }
 
+def validated_stride(annotations, task, start, stride):
+  result = annotations[start::stride]
+  if isinstance(task, str):
+    task = [task]
+  for x in result:
+    if not x['task'] in task:
+      exit(f'Invalid task type {task} in stride {stride} through annotations')
+  return result
+
 def index_other(annotations):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
@@ -36,12 +45,10 @@ def index_other(annotations):
     value = annotation['value']
     if task == HEADING: print(value)
     elif task == SUBJECT_PAGES:
-      for subject_annotation, pages_annotation in zip(value[::2], value[1::2]): #Subject and Pages group pairwise
-        if(not((subject_annotation['task'] in SUBJECT) and
-               (pages_annotation['task']   in PAGES)
-              )
-          ):
-          exit(f'At least one {SUBJECT_PAGES} subtask not in Subject or Pages:\n{subject_annotation}\n{pages_annotation}')
+      #Subject and Pages group pairwise
+      for subject_annotation, pages_annotation in \
+        zip(validated_stride(value, SUBJECT, 0, 2),
+            validated_stride(value, PAGES,   1, 2)):
         value = re.sub(r'^', '  ', subject_annotation['value'], flags = re.MULTILINE)
         print(value, end=' >>> ')
         print(pages_annotation['value'])
