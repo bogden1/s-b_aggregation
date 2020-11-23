@@ -5,6 +5,7 @@ import json
 
 import os
 import sys
+import re
 
 import pandas as pd
 
@@ -13,11 +14,16 @@ WORKFLOWS = {
     'id': 16866,
     'version': 11.28,
     'control': 'T20',
-    'skip': [ 'T0', 'T11', 'T15'], #Tasks in this workflow that we do not process any data for (combos, control flow)
     'other': {
       'Heading': 'T12',
-      'Subject': ['T13', 'T16', 'T18'],
-      'Pages':   ['T14', 'T17', 'T19'],
+      'skip': [ 'T15' ], #Tasks in this workflow that we do not process any data for (e.g. control flow)
+      'combo':
+        { 'T11':
+          {
+            'Subject': ['T13', 'T16', 'T18'],
+            'Pages':   ['T14', 'T17', 'T19'],
+          }
+        }
     },
     'names': {
       'Title': { 'standard': 'T8', 'other': 'T24' },
@@ -69,11 +75,22 @@ for workflow, workflow_data in WORKFLOWS.items():
         for annotation in annotations:
           task = annotation['task']
           value = annotation['value']
-          if task == tasks['Heading']: print(value)
-          elif task in tasks['Subject']: print(f'  {value}', end = '')
-          elif task in tasks['Pages']: print(value)
+          if task == tasks['Heading']: print(f'{value}')
+          elif task in tasks['combo'].keys():
+            if task == 'T11':
+              for subject_annotation, pages_annotation in zip(value[::2], value[1::2]): #Subject and Pages group pairwise
+                if(not((subject_annotation['task'] in tasks['combo']['T11']['Subject']) and
+                       (pages_annotation['task']   in tasks['combo']['T11']['Pages'])
+                      )
+                  ):
+                  exit(f'T11 subtask not in Subject or Pages:\n{subject_annotation}\n{pages_annotation}')
+                value = re.sub(r'^', '  ', subject_annotation['value'], flags = re.MULTILINE)
+                print(value, end=' >>> ')
+                print(pages_annotation['value'])
+                print()
+            else: error(f'Unknown combo task: {task}\n{value}')
           elif task == workflow_data['comments']: print(f'Comments: {value}')
-          elif task in workflow_data['skip']: continue
+          elif task in tasks['skip']: continue
           else: exit(f'Unknown task: {task}\nValue: {value}')
       elif control == 'Name list':
         tasks = workflow_data['names']
