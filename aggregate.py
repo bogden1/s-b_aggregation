@@ -25,6 +25,13 @@ def validated_stride(annotations, task, start, stride):
       exit(f'Invalid task type {task} in stride {stride} through annotations')
   return result
 
+def dropdown_value(dropdown_annotation, textbox_annotation):
+  value = dropdown_annotation['value']
+  if len(value) != 1: exit(f'Bad dropdown: too many values: {value}')
+  value = value[0]
+  if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
+  else: return value['label']
+
 def index_other(annotations):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
@@ -50,6 +57,43 @@ def index_other(annotations):
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
+def index_names(annotations):
+  NAME_COMBO = 'T0'
+  SURNAME = 'T1'
+  TITLE_STANDARD = 'T8'
+  TITLE_OTHER = 'T24'
+  FORENAME = 'T2'
+  POSITION_STANDARD = 'T9'
+  POSITION_OTHER = 'T25'
+  SUBJECT = 'T26'
+  PAGES = 'T6'
+  SKIP = 'T7'
+  HEADING = 'T12'
+  COMMENTS = 'T27'
+
+  while(len(annotations)):
+    annotation = annotations.pop(0)
+    task = annotation['task']
+    value = annotation['value']
+    if task == NAME_COMBO:
+      for surname, forename, title_dd, title_tb, position_dd, position_tb, subject, pages in \
+        zip(validated_stride(value, SURNAME,           0, 8),
+            validated_stride(value, FORENAME,          1, 8),
+            validated_stride(value, TITLE_STANDARD,    2, 8),
+            validated_stride(value, TITLE_OTHER,       3, 8),
+            validated_stride(value, POSITION_STANDARD, 4, 8),
+            validated_stride(value, POSITION_OTHER,    5, 8),
+            validated_stride(value, SUBJECT,           6, 8),
+            validated_stride(value, PAGES,             7, 8)):
+        print(f'{dropdown_value(title_dd, title_tb)} {forename["value"]} {surname["value"]}, {dropdown_value(position_dd, position_tb)}    {subject["value"]} >>> {pages["value"]}')
+    elif task == COMMENTS: print(f'Comments: {value}')
+    elif task == HEADING:
+      print()
+      annotations.insert(0, annotation)
+      index_other(annotations)
+      break
+    elif task == SKIP: continue
+    else: exit(f'Unknown task: {task}\n{value}')
 
 parser = argparse.ArgumentParser(
   description='''Aggregate data from S&B workflows''',
@@ -100,7 +144,7 @@ for workflow, workflow_data in WORKFLOWS.items():
       if control == 'Other page':
         index_other(annotations)
       elif control == 'Name list':
-        index_other(annotations) #PLACEHOLDER
+        index_names(annotations)
       elif control == 'Blank page':
         print('BLANK')
         continue
