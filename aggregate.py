@@ -82,9 +82,9 @@ for workflow, workflow_data in WORKFLOWS.items():
 
   #Read the transcriptions (using our knowledge about the workflows)
   for (page, annotations) in pages:
+    print(f'* Page: {page["page"]}')
+    control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
     if workflow == 'Index':
-      print(f'* Page: {page["page"]}')
-      control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
       if control == 'Other page':
         index_other(annotations)
       elif control == 'Name list':
