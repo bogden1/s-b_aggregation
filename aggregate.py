@@ -11,15 +11,8 @@ import pandas as pd
 
 WORKFLOWS = {
  'Index': {
-    'id': 16866,
-    'version': 11.28,
-    'names': {
-      'Title': { 'standard': 'T8', 'other': 'T24' },
-      'Forename': 'T2',
-      'Position': { 'standard': 'T9', 'other': 'T25'},
-      'Subject': 'T26',
-      'Pages': 'T6'
-    },
+    'id': 16866, #Alpha-Index
+    'version': 11.28, #Alpha-Index
   },
 }
 
@@ -65,7 +58,19 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('classifications', nargs='?', default='scarlets-and-blues-classifications.csv', help='Classifications file (default: scarlets-and-blues-classifications.csv)')
 parser.add_argument('-d', '--dump', action='store_true', help='Dump raw JSON')
+parser.add_argument('-w', '--workflow', nargs='*', default=[])
 args = parser.parse_args()
+
+for x in args.workflow:
+  parts = x.split(':')
+  if len(parts) != 3:
+    exit('Bad args')
+  if not parts[0] in ['Index']:
+    exit('Bad args')
+  WORKFLOWS[parts[0]] = {
+    'id': int(parts[1]),
+    'version': float(parts[2]),
+  }
 
 classifications = pd.read_csv(args.classifications)
 
@@ -95,8 +100,7 @@ for workflow, workflow_data in WORKFLOWS.items():
       if control == 'Other page':
         index_other(annotations)
       elif control == 'Name list':
-        tasks = workflow_data['names']
-        ##TODO
+        index_other(annotations) #PLACEHOLDER
       elif control == 'Blank page':
         print('BLANK')
         continue
