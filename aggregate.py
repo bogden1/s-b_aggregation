@@ -32,7 +32,7 @@ def dropdown_value(dropdown_annotation, textbox_annotation):
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
   else: return value['label']
 
-def index_other(page, annotations):
+def index_other(page_data, annotations):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -60,13 +60,21 @@ def index_other(page, annotations):
           print(subject, end=' >>> ')
           print(pages)
           print()
-          output.append([heading, subject, pages])
+          if pages == '': output.append([heading, subject, '', ''])
+          else:
+            match = re.search(r'\([^\),]*,[^\)]*\)', pages)
+            if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pages}".')
+            pages = pages.split(',')
+            for page in pages:
+              match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', page)
+              if not match: exit(f'Bad pages string: "{page}"')
+              output.append([heading, subject, match.group(1), match.group(2)])
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
-    pd.DataFrame(output, columns = ['Heading', 'Subject', 'Pages']). \
-      to_csv(path_or_buf = f'IndexOther_{page["page"]}.csv', index = False)
+    pd.DataFrame(output, columns = ['Heading', 'Subject', 'Page', 'Annotation']). \
+      to_csv(path_or_buf = f'IndexOther_{page_data["page"]}.csv', index = False)
 
 def index_names(annotations):
   NAME_COMBO = 'T0'
