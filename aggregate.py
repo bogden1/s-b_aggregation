@@ -146,7 +146,7 @@ for workflow, workflow_data in WORKFLOWS.items():
       elif control == 'Name list':
         index_names(annotations)
       elif control == 'Blank page':
-        print('BLANK')
+        print('*** BLANK ***')
         continue
       else: exit(f"Bad control switch: \"{control}\"")
       print()
