@@ -49,10 +49,11 @@ def index_other(annotations):
       for subject_annotation, pages_annotation in \
         zip(validated_stride(value, SUBJECT, 0, 2),
             validated_stride(value, PAGES,   1, 2)):
-        value = re.sub(r'^', '  ', subject_annotation['value'], flags = re.MULTILINE)
-        print(value, end=' >>> ')
-        print(pages_annotation['value'])
-        print()
+        if subject_annotation['value'] != '' or pages_annotation['value'] != '':
+          value = re.sub(r'^', '  ', subject_annotation['value'], flags = re.MULTILINE)
+          print(value, end=' >>> ')
+          print(pages_annotation['value'])
+          print()
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
