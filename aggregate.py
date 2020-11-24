@@ -32,7 +32,7 @@ def dropdown_value(dropdown_annotation, textbox_annotation):
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
   else: return value['label']
 
-def index_other(annotations):
+def index_other(page, annotations):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -40,10 +40,14 @@ def index_other(annotations):
   SKIP    = 'T15'
   COMMENTS = 'T27'
 
+  output = []
+  heading = None
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
-    if task == HEADING: print(value)
+    if task == HEADING:
+      print(value)
+      heading = value
     elif task == SUBJECT_PAGES:
       #Subject and Pages group pairwise
       for subject_annotation, pages_annotation in \
@@ -54,9 +58,13 @@ def index_other(annotations):
           print(value, end=' >>> ')
           print(pages_annotation['value'])
           print()
+          output.append([heading, value, pages_annotation['value']])
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
+
+    pd.DataFrame(output, columns = ['Heading', 'Subject', 'Pages']). \
+      to_csv(path_or_buf = f'IndexOther_{page["page"]}.csv', index = False)
 
 def index_names(annotations):
   NAME_COMBO = 'T0'
@@ -143,7 +151,7 @@ for workflow, workflow_data in WORKFLOWS.items():
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
     if workflow == 'Index':
       if control == 'Other page':
-        index_other(annotations)
+        index_other(page, annotations)
       elif control == 'Name list':
         index_names(annotations)
       elif control == 'Blank page':
