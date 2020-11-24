@@ -53,12 +53,14 @@ def index_other(page, annotations):
       for subject_annotation, pages_annotation in \
         zip(validated_stride(value, SUBJECT, 0, 2),
             validated_stride(value, PAGES,   1, 2)):
-        if subject_annotation['value'] != '' or pages_annotation['value'] != '':
-          value = re.sub(r'^', '  ', subject_annotation['value'], flags = re.MULTILINE)
-          print(value, end=' >>> ')
-          print(pages_annotation['value'])
+        subject = subject_annotation['value']
+        pages = pages_annotation['value']
+        if subject != '' or pages != '':
+          subject = re.sub(r'^', '  ', subject, flags = re.MULTILINE)
+          print(subject, end=' >>> ')
+          print(pages)
           print()
-          output.append([heading, value, pages_annotation['value']])
+          output.append([heading, subject, pages])
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
