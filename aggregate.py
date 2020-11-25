@@ -63,7 +63,7 @@ def index_other(page_data, annotations):
           print(subject, end=' >>> ')
           print(pages)
           print()
-          if pages == '': output.append([page_number, entry, heading, subject, '', ''])
+          if pages == '': output.append([page_number, entry, heading, subject, '', '', ''])
           else:
             match = re.search(r'\([^\),]*,[^\)]*\)', pages)
             if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pages}".')
@@ -71,8 +71,10 @@ def index_other(page_data, annotations):
             for page in pages:
               match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', page)
               if not match: exit(f'Bad pages string: "{page}"')
-              output.append([page_number, entry, heading, subject, match.group(1), match.group(2)])
-    elif task == COMMENTS: print(f'Comments: {value}')
+              output.append([page_number, entry, heading, subject, match.group(1), match.group(2), None])
+    elif task == COMMENTS:
+      print(f'Comments: {value}')
+      output.append([page_number, entry, None, None, None, None, value])
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
     entry += 1
@@ -175,6 +177,6 @@ for workflow, workflow_data in WORKFLOWS.items():
       exit(f'Bad workflow: "{workflow}"')
 
   if workflow == 'Index':
-    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'Page', 'Annotation']). \
+    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'Page', 'Annotation', 'Comments']). \
       to_csv(path_or_buf = f'Index.csv', index = False)
 
