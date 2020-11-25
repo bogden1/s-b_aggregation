@@ -16,6 +16,8 @@ WORKFLOWS = {
   },
 }
 
+output = []
+
 def validated_stride(annotations, task, start, stride):
   result = annotations[start::stride]
   if isinstance(task, str):
@@ -40,8 +42,9 @@ def index_other(page_data, annotations):
   SKIP    = 'T15'
   COMMENTS = 'T27'
 
-  output = []
+  page_number = page_data['page']
   heading = None
+  entry = 0
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
@@ -60,7 +63,7 @@ def index_other(page_data, annotations):
           print(subject, end=' >>> ')
           print(pages)
           print()
-          if pages == '': output.append([heading, subject, '', ''])
+          if pages == '': output.append([page_number, entry, heading, subject, '', ''])
           else:
             match = re.search(r'\([^\),]*,[^\)]*\)', pages)
             if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pages}".')
@@ -68,13 +71,12 @@ def index_other(page_data, annotations):
             for page in pages:
               match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', page)
               if not match: exit(f'Bad pages string: "{page}"')
-              output.append([heading, subject, match.group(1), match.group(2)])
+              output.append([page_number, entry, heading, subject, match.group(1), match.group(2)])
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
+    entry += 1
 
-    pd.DataFrame(output, columns = ['Heading', 'Subject', 'Page', 'Annotation']). \
-      to_csv(path_or_buf = f'IndexOther_{page_data["page"]}.csv', index = False)
 
 def index_names(annotations):
   NAME_COMBO = 'T0'
@@ -171,4 +173,8 @@ for workflow, workflow_data in WORKFLOWS.items():
       print()
     else:
       exit(f'Bad workflow: "{workflow}"')
+
+  if workflow == 'Index':
+    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'Page', 'Annotation']). \
+      to_csv(path_or_buf = f'Index.csv', index = False)
 
