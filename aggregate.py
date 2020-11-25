@@ -177,6 +177,6 @@ for workflow, workflow_data in WORKFLOWS.items():
       exit(f'Bad workflow: "{workflow}"')
 
   if workflow == 'Index':
-    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'Page', 'Annotation', 'Comments']). \
-      to_csv(path_or_buf = f'Index.csv', index = False)
+    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+      sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
 
