@@ -53,26 +53,26 @@ def index_other(page_data, annotations):
       heading = value
     elif task == SUBJECT_PAGES:
       #Subject and Pages group pairwise
-      for subject_annotation, pages_annotation in \
+      for subject_annotation, pagerefs_annotation in \
         zip(validated_stride(value, SUBJECT, 0, 2),
             validated_stride(value, PAGES,   1, 2)):
         subject = subject_annotation['value']
-        pages = pages_annotation['value']
-        if subject != '' or pages != '':
+        pagerefs = pagerefs_annotation['value']
+        if subject != '' or pagerefs != '':
           subject = re.sub(r'^', '  ', subject, flags = re.MULTILINE)
           print(subject, end=' >>> ')
-          print(pages)
+          print(pagerefs)
           print()
-          if pages == '':
+          if pagerefs == '':
             output.append([page_number, entry, heading, subject, '', '', ''])
             entry += 1
           else:
-            match = re.search(r'\([^\),]*,[^\)]*\)', pages)
-            if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pages}".')
-            pages = pages.split(',')
-            for page in pages:
-              match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', page)
-              if not match: exit(f'Bad pages string: "{page}"')
+            match = re.search(r'\([^\),]*,[^\)]*\)', pagerefs)
+            if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pagerefs}".')
+            pagerefs = pagerefs.split(',')
+            for pageref in pagerefs:
+              match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', pageref)
+              if not match: exit(f'Bad pagerefs string: "{pageref}"')
               output.append([page_number, entry, heading, subject, match.group(1), match.group(2), None])
               entry += 1
     elif task == COMMENTS:
