@@ -83,7 +83,7 @@ def index_other(page_data, annotations):
     else: exit(f'Unknown task: {task}\n{value}')
 
 
-def index_names(annotations):
+def index_names(page_data, annotations):
   NAME_COMBO = 'T0'
   SURNAME = 'T1'
   TITLE_STANDARD = 'T8'
@@ -116,7 +116,7 @@ def index_names(annotations):
     elif task == HEADING:
       print()
       annotations.insert(0, annotation)
-      index_other(annotations)
+      index_other(page_data, annotations)
       break
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
@@ -170,7 +170,7 @@ for workflow, workflow_data in WORKFLOWS.items():
       if control == 'Other page':
         index_other(page, annotations)
       elif control == 'Name list':
-        index_names(annotations)
+        index_names(page, annotations)
       elif control == 'Blank page':
         print('*** BLANK ***')
         continue
