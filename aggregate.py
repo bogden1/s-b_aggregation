@@ -63,7 +63,9 @@ def index_other(page_data, annotations):
           print(subject, end=' >>> ')
           print(pages)
           print()
-          if pages == '': output.append([page_number, entry, heading, subject, '', '', ''])
+          if pages == '':
+            output.append([page_number, entry, heading, subject, '', '', ''])
+            entry += 1
           else:
             match = re.search(r'\([^\),]*,[^\)]*\)', pages)
             if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pages}".')
@@ -72,12 +74,13 @@ def index_other(page_data, annotations):
               match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', page)
               if not match: exit(f'Bad pages string: "{page}"')
               output.append([page_number, entry, heading, subject, match.group(1), match.group(2), None])
+              entry += 1
     elif task == COMMENTS:
       print(f'Comments: {value}')
       output.append([page_number, entry, None, None, None, None, value])
+      entry += 1
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
-    entry += 1
 
 
 def index_names(annotations):
