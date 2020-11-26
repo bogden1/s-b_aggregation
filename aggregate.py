@@ -57,7 +57,7 @@ def pageref_annotations(pagerefs):
     exit(f'Bad pagerefs string: "{pageref}"')
   return output
 
-def index_other(page_data, annotations, output):
+def index_other(page_data, annotations, other_index):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -87,15 +87,15 @@ def index_other(page_data, annotations, output):
           print(pagerefs)
           print()
           if pagerefs == '':
-            output.append([page_number, entry, heading, subject, '', '', ''])
+            other_index.append([page_number, entry, heading, subject, '', '', ''])
             entry += 1
           else:
             for pageref, annotation in pageref_annotations(pagerefs):
-              output.append([page_number, entry, heading, subject, pageref, annotation, None])
+              other_index.append([page_number, entry, heading, subject, pageref, annotation, None])
               entry += 1
     elif task == COMMENTS:
       print(f'Comments: {value}')
-      output.append([page_number, entry, None, None, None, None, value])
+      other_index.append([page_number, entry, None, None, None, None, value])
       entry += 1
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
