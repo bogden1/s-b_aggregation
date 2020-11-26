@@ -135,8 +135,13 @@ def index_names(page_data, annotations, name_index, other_index):
         position = dropdown_value(position_dd, position_tb)
         forename = forename['value']; surname = surname['value']; subject = subject['value']; pages = pages['value']
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pages}')
-        name_index.append([page_number, entry, title, forename, surname, position, subject, pages, None, None])
-        entry += 1
+        if pages == '':
+          name_index.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
+          entry += 1
+        else:
+          for pageref, annotation in pageref_annotations(pages):
+            name_index.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
+            entry += 1
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == HEADING:
       print()
