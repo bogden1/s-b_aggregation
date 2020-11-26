@@ -67,13 +67,18 @@ def index_other(page_data, annotations, other_index):
 
   page_number = page_data['page']
   heading = None
+  heading_stored = True #TODO: This is getting messy -- would it help to have an inner function to update the array?
   entry = 0
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
     if task == HEADING:
       print(value)
+      if not heading_stored:
+        other_index.append([page_number, entry, heading, None, None, None, None])
+        entry += 1
       heading = value
+      heading_stored = False
     elif task == SUBJECT_PAGES:
       #Subject and Pages group pairwise
       for subject_annotation, pagerefs_annotation in \
@@ -93,7 +98,12 @@ def index_other(page_data, annotations, other_index):
             for pageref, annotation in pageref_annotations(pagerefs):
               other_index.append([page_number, entry, heading, subject, pageref, annotation, None])
               entry += 1
+          heading_stored = True
     elif task == COMMENTS:
+      if not heading_stored:
+        other_index.append([page_number, entry, heading, None, None, None, None])
+        entry += 1
+        heading_stored = True
       print(f'Comments: {value}')
       other_index.append([page_number, entry, None, None, None, None, value])
       entry += 1
