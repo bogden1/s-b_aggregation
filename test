@@ -1,0 +1,12 @@
+#!/bin/bash
+./aggregate.py scarlets-and-blues-classifications.csv -w Index:16899:1.1 | diff -s testing/GOLDEN_NAMES - && \
+diff -s Index.csv testing/GOLDEN_NameIndex.csv && \
+diff -s Names.csv testing/GOLDEN_Names.csv && \
+./aggregate.py scarlets-and-blues-classifications.csv | diff -s testing/GOLDEN_INDEX - && \
+diff -s Index.csv testing/GOLDEN_INDEX.csv && \
+! ./aggregate.py testing/test.csv && \
+! ./aggregate.py testing/test1.csv && \
+! ./aggregate.py testing/test2.csv && \
+! ./aggregate.py testing/test3.csv && \
+echo -e '\033[0;32mTEST PASSED\033[0m' || \
+echo -e '\033[0;31mTEST FAILED\033[0m'

@@ -1,0 +1,2 @@
+workflow_id,workflow_name,workflow_version,annotations,subject_data,subject_ids
+16866,Alpha-Index,11.28,"[{""task"":""T20"",""value"":""Other page""},{""task"":""T12"",""value"":""Working Staff RHC\n(Employed Men)""},{""task"":""T11"",""value"":[{""task"":""T13"",""value"":""H Saville - Cook in Gt Kitchen""},{""task"":""T14"",""value"":""194 (a,a)""}]}]","{""45581489"":{""retired"":null,""name"":""WO 250/436 081"",""page"":""81"",""letters"":""W"",""persons"":""0"",""filename"":""WO_250_436_081.jpg""}}",45581489
