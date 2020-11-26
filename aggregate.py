@@ -41,9 +41,20 @@ def pageref_annotations(pagerefs):
   pagerefs = pagerefs.split(',')
   output = []
   for pageref in [x.strip() for x in pagerefs]:
+    #This regexp defines what volunteers are asked to do
     match = re.fullmatch(r'(\d+)\s*(?:\(\s*(\S+)\s*\))?', pageref)
-    if not match: exit(f'Bad pagerefs string: "{pageref}"')
-    output.append([match.group(1), match.group(2)])
+    if match:
+      output.append([match.group(1), match.group(2)])
+      continue
+
+    #This regexp handles the case where volunteer instead puts the annotation at the beginning
+    match = re.fullmatch(r'(.+)\s+(\d+)', pageref)
+    if match:
+      output.append([match.group(2), match.group(1)])
+      continue
+
+    #Exit if string is not of any form where we can work out what the volunteer meant
+    exit(f'Bad pagerefs string: "{pageref}"')
   return output
 
 def index_other(page_data, annotations, output):
