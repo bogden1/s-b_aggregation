@@ -142,8 +142,21 @@ def index_names(page_data, annotations, name_index, other_index):
           for pageref, annotation in pageref_annotations(pagerefs):
             name_index.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
             entry += 1
-    elif task == COMMENTS: print(f'Comments: {value}')
+    elif task == COMMENTS:
+      print(f'Comments: {value}')
+      name_index.append([page_number, entry, None, None, None, None, None, None, None, value])
+      entry += 1
     elif task == HEADING:
+      #Make sure that we add any comment to this CSV, as well as the other one
+      #Note that COMMENT is the same in both functions, as they are processing data from the same page,
+      #so we will end up with the comment in both CSV files, which is what we want.
+      #TODO: it would be neater to do this in the loop that calls this function, at page level
+      #TODO: it should also always be the final task, so I likely do not need this loop -- but a moot point if I deal with the TODO above
+      for x in annotations:
+        if x['task'] == COMMENTS:
+          print(f'Comments: {x["value"]}')
+          name_index.append([page_number, entry, None, None, None, None, None, None, None, x['value']])
+
       print()
       annotations.insert(0, annotation)
       index_other(page_data, annotations, other_index)
