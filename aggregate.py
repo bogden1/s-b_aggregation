@@ -40,8 +40,8 @@ def pageref_annotations(pagerefs):
   if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pagerefs}".')
   pagerefs = pagerefs.split(',')
   output = []
-  for pageref in pagerefs:
-    match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', pageref)
+  for pageref in [x.strip() for x in pagerefs]:
+    match = re.fullmatch(r'(\d+)\s*(?:\(\s*(\S+)\s*\))?', pageref)
     if not match: exit(f'Bad pagerefs string: "{pageref}"')
     output.append([match.group(1), match.group(2)])
   return output
