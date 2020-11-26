@@ -122,7 +122,7 @@ def index_names(page_data, annotations, name_index, other_index):
     task = annotation['task']
     value = annotation['value']
     if task == NAME_COMBO:
-      for surname, forename, title_dd, title_tb, position_dd, position_tb, subject, pages in \
+      for surname, forename, title_dd, title_tb, position_dd, position_tb, subject, pagerefs in \
         zip(validated_stride(value, SURNAME,           0, 8),
             validated_stride(value, FORENAME,          1, 8),
             validated_stride(value, TITLE_STANDARD,    2, 8),
@@ -133,13 +133,13 @@ def index_names(page_data, annotations, name_index, other_index):
             validated_stride(value, PAGES,             7, 8)):
         title = dropdown_value(title_dd, title_tb)
         position = dropdown_value(position_dd, position_tb)
-        forename = forename['value']; surname = surname['value']; subject = subject['value']; pages = pages['value']
-        print(f'{title} {forename} {surname}, {position}    {subject} >>> {pages}')
-        if pages == '':
+        forename = forename['value']; surname = surname['value']; subject = subject['value']; pagerefs = pagerefs['value']
+        print(f'{title} {forename} {surname}, {position}    {subject} >>> {pagerefs}')
+        if pagerefs == '':
           name_index.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
           entry += 1
         else:
-          for pageref, annotation in pageref_annotations(pages):
+          for pageref, annotation in pageref_annotations(pagerefs):
             name_index.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
             entry += 1
     elif task == COMMENTS: print(f'Comments: {value}')
