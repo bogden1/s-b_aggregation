@@ -111,7 +111,10 @@ def index_names(page_data, annotations):
             validated_stride(value, POSITION_OTHER,    5, 8),
             validated_stride(value, SUBJECT,           6, 8),
             validated_stride(value, PAGES,             7, 8)):
-        print(f'{dropdown_value(title_dd, title_tb)} {forename["value"]} {surname["value"]}, {dropdown_value(position_dd, position_tb)}    {subject["value"]} >>> {pages["value"]}')
+        title = dropdown_value(title_dd, title_tb)
+        position = dropdown_value(position_dd, position_tb)
+        forename = forename['value']; surname = surname['value']; subject = subject['value']; pages = pages['value']
+        print(f'{title} {forename} {surname}, {position}    {subject} >>> {pages}')
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == HEADING:
       print()
