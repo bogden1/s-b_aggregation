@@ -16,8 +16,6 @@ WORKFLOWS = {
   },
 }
 
-output = []
-
 def validated_stride(annotations, task, start, stride):
   result = annotations[start::stride]
   if isinstance(task, str):
@@ -34,7 +32,7 @@ def dropdown_value(dropdown_annotation, textbox_annotation):
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
   else: return value['label']
 
-def index_other(page_data, annotations):
+def index_other(page_data, annotations, output):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -83,7 +81,7 @@ def index_other(page_data, annotations):
     else: exit(f'Unknown task: {task}\n{value}')
 
 
-def index_names(page_data, annotations):
+def index_names(page_data, annotations, name_index, other_index):
   NAME_COMBO = 'T0'
   SURNAME = 'T1'
   TITLE_STANDARD = 'T8'
@@ -119,7 +117,7 @@ def index_names(page_data, annotations):
     elif task == HEADING:
       print()
       annotations.insert(0, annotation)
-      index_other(page_data, annotations)
+      index_other(page_data, annotations, other_index)
       break
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
@@ -166,14 +164,16 @@ for workflow, workflow_data in WORKFLOWS.items():
   if args.dump: print(json.dumps(pages, indent=2))
 
   #Read the transcriptions (using our knowledge about the workflows)
+  other_index = []
+  name_index = []
   for (page, annotations) in pages:
     print(f'* Page: {page["page"]}')
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
     if workflow == 'Index':
       if control == 'Other page':
-        index_other(page, annotations)
+        index_other(page, annotations, other_index)
       elif control == 'Name list':
-        index_names(page, annotations)
+        index_names(page, annotations, name_index, other_index)
       elif control == 'Blank page':
         print('*** BLANK ***')
         continue
@@ -183,6 +183,6 @@ for workflow, workflow_data in WORKFLOWS.items():
       exit(f'Bad workflow: "{workflow}"')
 
   if workflow == 'Index':
-    pd.DataFrame(output, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+    pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
 
