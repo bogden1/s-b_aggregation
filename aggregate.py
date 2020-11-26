@@ -32,6 +32,20 @@ def dropdown_value(dropdown_annotation, textbox_annotation):
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
   else: return value['label']
 
+#Return page number and any associated annoatation as a list for each page number
+#Unfortunate naming, given that an 'annotation' is something returned from a Zooniverse volunteer,
+#but here refers to an annotation written in the minute book by a person
+def pageref_annotations(pagerefs):
+  match = re.search(r'\([^\),]*,[^\)]*\)', pagerefs)
+  if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pagerefs}".')
+  pagerefs = pagerefs.split(',')
+  output = []
+  for pageref in pagerefs:
+    match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', pageref)
+    if not match: exit(f'Bad pagerefs string: "{pageref}"')
+    output.append([match.group(1), match.group(2)])
+  return output
+
 def index_other(page_data, annotations, output):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
@@ -65,13 +79,8 @@ def index_other(page_data, annotations, output):
             output.append([page_number, entry, heading, subject, '', '', ''])
             entry += 1
           else:
-            match = re.search(r'\([^\),]*,[^\)]*\)', pagerefs)
-            if match: exit(f'Comma within brackets: assumption that we can split on comma is broken.\nMatch is "{match.group(0)}" in "{pagerefs}".')
-            pagerefs = pagerefs.split(',')
-            for pageref in pagerefs:
-              match = re.fullmatch(r'\s*(\d+)\s*(?:\(\s*(\S+)\s*\))?\s*', pageref)
-              if not match: exit(f'Bad pagerefs string: "{pageref}"')
-              output.append([page_number, entry, heading, subject, match.group(1), match.group(2), None])
+            for pageref, annotation in pageref_annotations(pagerefs):
+              output.append([page_number, entry, heading, subject, pageref, annotation, None])
               entry += 1
     elif task == COMMENTS:
       print(f'Comments: {value}')
