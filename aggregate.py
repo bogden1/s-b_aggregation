@@ -95,6 +95,8 @@ def index_names(page_data, annotations, name_index, other_index):
   HEADING = 'T12'
   COMMENTS = 'T27'
 
+  page_number = page_data['page']
+  entry = 0
   while(len(annotations)):
     annotation = annotations.pop(0)
     task = annotation['task']
@@ -113,6 +115,8 @@ def index_names(page_data, annotations, name_index, other_index):
         position = dropdown_value(position_dd, position_tb)
         forename = forename['value']; surname = surname['value']; subject = subject['value']; pages = pages['value']
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pages}')
+        name_index.append([page_number, entry, title, forename, surname, position, subject, pages, None, None])
+        entry += 1
     elif task == COMMENTS: print(f'Comments: {value}')
     elif task == HEADING:
       print()
@@ -185,4 +189,6 @@ for workflow, workflow_data in WORKFLOWS.items():
   if workflow == 'Index':
     pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
+    pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+      sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
 
