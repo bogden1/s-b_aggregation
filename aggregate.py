@@ -14,6 +14,10 @@ WORKFLOWS = {
     'id': 16866, #Alpha-Index
     'version': 11.28, #Alpha-Index
   },
+  'Minutes': {
+    'id': 16890, #Alpha-Minutes
+    'version': 4.9, #Alpha-Minutes
+  },
 }
 
 def validated_stride(annotations, task, start, stride):
@@ -225,6 +229,7 @@ for workflow in workflow_list:
   #Read the transcriptions (using our knowledge about the workflows)
   other_index = []
   name_index = []
+  front_minutes = []
   for (page, annotations) in pages:
     print(f'* Page: {page["page"]}')
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
@@ -238,6 +243,16 @@ for workflow in workflow_list:
         continue
       else: exit(f"Bad control switch: \"{control}\"")
       print()
+    elif workflow == 'Minutes':
+      if control == 'Front page, with attendance list':
+        print(control)
+      elif control == 'Other page':
+        print(control)
+      elif control == 'Blank page':
+        print('*** BLANK ***')
+        continue
+      else: exit(f"Bad control switch: \"{control}\"")
+      print()
     else:
       exit(f'Bad workflow: "{workflow}"')
 
@@ -246,4 +261,6 @@ for workflow in workflow_list:
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
     pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
+  elif workflow == 'Minutes':
+    pd.DataFrame(front_minutes).to_csv(path_or_buf = 'Minutes.csv', index = False) #COLUMNS TODO
 
