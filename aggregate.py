@@ -42,13 +42,13 @@ def pageref_annotations(pagerefs):
   output = []
   for pageref in [x.strip() for x in pagerefs]:
     #This regexp defines what volunteers are asked to do
-    match = re.fullmatch(r'(\d+)\s*(?:\(\s*(.+)\s*\))?', pageref)
+    match = re.fullmatch(r'(\d+)\s*(?:\(\s*(.+?)\s*\))?', pageref)
     if match:
       output.append([match.group(1), match.group(2)])
       continue
 
     #This regexp handles the case where volunteer instead puts the annotation at the beginning
-    match = re.fullmatch(r'(.+)\s+(\d+)', pageref)
+    match = re.fullmatch(r'(.+?)\s+(\d+)', pageref)
     if match:
       output.append([match.group(2), match.group(1)])
       continue
