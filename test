@@ -3,7 +3,7 @@ cd testing
 ../aggregate.py scarlets-and-blues-classifications.csv -w Index:16899:1.1 | diff -s GOLDEN_NAMES - && \
 diff -s Index.csv GOLDEN_NameIndex.csv && \
 diff -s Names.csv GOLDEN_Names.csv && \
-../aggregate.py scarlets-and-blues-classifications.csv | diff -s GOLDEN_INDEX - && \
+../aggregate.py scarlets-and-blues-classifications.csv -w Index | diff -s GOLDEN_INDEX - && \
 diff -s Index.csv GOLDEN_INDEX.csv && \
 ! ../aggregate.py test.csv && \
 ! ../aggregate.py test1.csv && \

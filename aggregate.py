@@ -184,20 +184,27 @@ parser.add_argument('-d', '--dump', action='store_true', help='Dump raw JSON')
 parser.add_argument('-w', '--workflow', nargs='*', default=[])
 args = parser.parse_args()
 
+workflow_list = []
 for x in args.workflow:
   parts = x.split(':')
-  if len(parts) != 3:
-    exit('Bad args')
-  if not parts[0] in ['Index']:
-    exit('Bad args')
-  WORKFLOWS[parts[0]] = {
-    'id': int(parts[1]),
-    'version': float(parts[2]),
-  }
+  if len(parts) == 3:
+    if not parts[0] in WORKFLOWS:
+      exit(f'Bad args: {parts[0]} is not a key in WORKFLOWS')
+    workflow_list.append(parts[0])
+    WORKFLOWS[parts[0]] = {
+      'id': int(parts[1]),
+      'version': float(parts[2]),
+    }
+  elif len(parts) == 1:
+    workflow_list.append(parts[0])
+  else:
+    exit(f'Bad args: workflow argument {parts} must have 1 or 3 parts')
+if len(workflow_list) == 0: workflow_list = WORKFLOWS.keys()
 
 classifications = pd.read_csv(args.classifications)
 
-for workflow, workflow_data in WORKFLOWS.items():
+for workflow in workflow_list:
+  workflow_data = WORKFLOWS[workflow]
   #Heading
   print(f'### {workflow} {workflow_data["version"]} ({os.path.basename(args.classifications)})')
 
