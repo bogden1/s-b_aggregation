@@ -20,21 +20,31 @@ WORKFLOWS = {
   },
 }
 
-def validated_stride(annotations, task, start, stride):
-  result = annotations[start::stride]
-  if isinstance(task, str):
-    task = [task]
-  for x in result:
-    if not x['task'] in task:
-      exit(f'Invalid task type {task} in stride {stride} through annotations')
-  return result
+def validate(expected_task, annotation):
+  if isinstance(expected_task, str): expected_task = [expected_task]
+  task = annotation['task']
+  if not task in expected_task:
+    exit(f'Invalid task type {task}: expected {expected_task}')
 
-def dropdown_value(dropdown_annotation, textbox_annotation):
+def get_dropdown_value(expected_dropdown_task, dropdown_annotation, expected_textbox_task, textbox_annotation):
+  validate(expected_dropdown_task, dropdown_annotation)
+  validate(expected_textbox_task, textbox_annotation)
   value = dropdown_annotation['value']
   if len(value) != 1: exit(f'Bad dropdown: too many values: {value}')
   value = value[0]
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
   else: return value['label']
+
+def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_textbox_task, textbox_annotations):
+  return [get_dropdown_value(expected_dropdown_task, dd, expected_textbox_task, tb) for dd, tb in \
+    zip(dropdown_annotations, textbox_annotations)]
+
+def get_value(expected_task, annotation):
+  validate(expected_task, annotation)
+  return annotation['value']
+
+def get_values(expected_tasks, annotations):
+  return [get_value(expected_tasks, x) for x in annotations]
 
 #Return page number and any associated annoatation as a list for each page number
 #Unfortunate naming, given that an 'annotation' is something returned from a Zooniverse volunteer,
@@ -85,11 +95,9 @@ def index_other(page_data, annotations, other_index):
       heading_stored = False
     elif task == SUBJECT_PAGES:
       #Subject and Pages group pairwise
-      for subject_annotation, pagerefs_annotation in \
-        zip(validated_stride(value, SUBJECT, 0, 2),
-            validated_stride(value, PAGES,   1, 2)):
-        subject = subject_annotation['value']
-        pagerefs = pagerefs_annotation['value']
+      for subject, pagerefs in \
+        zip(get_values(SUBJECT, value[0::2]),
+            get_values(PAGES,   value[1::2])):
         if subject != '' or pagerefs != '':
           subject = re.sub(r'^', '  ', subject, flags = re.MULTILINE)
           print(subject, end=' >>> ')
@@ -136,18 +144,13 @@ def index_names(page_data, annotations, name_index, other_index):
     task = annotation['task']
     value = annotation['value']
     if task == NAME_COMBO:
-      for surname, forename, title_dd, title_tb, position_dd, position_tb, subject, pagerefs in \
-        zip(validated_stride(value, SURNAME,           0, 8),
-            validated_stride(value, FORENAME,          1, 8),
-            validated_stride(value, TITLE_STANDARD,    2, 8),
-            validated_stride(value, TITLE_OTHER,       3, 8),
-            validated_stride(value, POSITION_STANDARD, 4, 8),
-            validated_stride(value, POSITION_OTHER,    5, 8),
-            validated_stride(value, SUBJECT,           6, 8),
-            validated_stride(value, PAGES,             7, 8)):
-        title = dropdown_value(title_dd, title_tb)
-        position = dropdown_value(position_dd, position_tb)
-        forename = forename['value']; surname = surname['value']; subject = subject['value']; pagerefs = pagerefs['value']
+      for surname, forename, title, position, subject, pagerefs in \
+        zip(get_values(SURNAME,           value[0::8]),
+            get_values(FORENAME,          value[1::8]),
+            get_dropdown_values(TITLE_STANDARD, value[2::8], TITLE_OTHER, value[3::8]),
+            get_dropdown_values(POSITION_STANDARD, value[4::8], POSITION_OTHER, value[5::8]),
+            get_values(SUBJECT,           value[6::8]),
+            get_values(PAGES,             value[7::8])):
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pagerefs}')
         if pagerefs == '':
           name_index.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
@@ -207,19 +210,13 @@ def minutes_front(page_data, annotations, front_minutes):
       print('\n\033[4mAgenda Items\033[0m')
       print('\n'.join(value))
     elif task == OTHER_ITEMS_COMBO:
-      for number_dd, number_tb, title, text, resolution, classification, in \
-        zip(validated_stride(value, OTHER_ITEMS_STANDARD_NUMBER, 0, 6),
-            validated_stride(value, OTHER_ITEMS_OTHER_NUMBER,    1, 6),
-            validated_stride(value, OTHER_ITEMS_TITLE,           2, 6),
-            validated_stride(value, OTHER_ITEMS_TEXT,            3, 6),
-            validated_stride(value, OTHER_ITEMS_RESOLUTION,      4, 6),
-            validated_stride(value, OTHER_ITEMS_CLASSIFICATION,  5, 6)):
-        number = dropdown_value(number_dd, number_tb)
-        title = title['value']; text = text['value']; resolution = resolution['value']; classification = ['classification_value']
-        print(f'{number}. ', end = '')
-        if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
-        if len(text):  print(text, end = ': ')
-        print(resolution)
+      number = get_dropdown_value(OTHER_ITEMS_STANDARD_NUMBER, value[0], OTHER_ITEMS_OTHER_NUMBER, value[1])
+      title, text, resolution, classification = [get_value(x, y) for x, y in \
+        zip([OTHER_ITEMS_TITLE, OTHER_ITEMS_TEXT, OTHER_ITEMS_RESOLUTION, OTHER_ITEMS_CLASSIFICATION], value[2:])]
+      print(f'{number}. ', end = '')
+      if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
+      if len(text):  print(text, end = ': ')
+      print(resolution)
     elif task == COMMENTS:
       print(f'Comments: {value}')
     elif task in SKIP: continue
