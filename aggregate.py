@@ -178,6 +178,54 @@ def index_names(page_data, annotations, name_index, other_index):
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
+def minutes_front(page_data, annotations, front_minutes):
+  STANDARD_ATTENDEES = 'T9'
+  OTHER_ATTENDEES = 'T3'
+  STANDARD_ITEMS = 'T14'
+  OTHER_ITEMS_COMBO = 'T7'
+  OTHER_ITEMS_STANDARD_NUMBER = 'T12'
+  OTHER_ITEMS_OTHER_NUMBER = 'T54'
+  OTHER_ITEMS_TITLE = 'T13'
+  OTHER_ITEMS_TEXT = 'T5'
+  OTHER_ITEMS_RESOLUTION = 'T6'
+  OTHER_ITEMS_CLASSIFICATION = 'T10'
+  COMMENTS = 'T28'
+  SKIP = ['T15', 'T55'] #T15: 'Are there any non-standard minutes to transcribe?'
+                        #T55: 'Is there another agenda item to transcribe?'
+
+  page_number = page_data['page']
+  entry = 0
+  print('\033[4mAttendees\033[0m')
+  for annotation in annotations:
+    task = annotation['task']
+    value = annotation['value']
+    if task == STANDARD_ATTENDEES:
+      print('\n'.join(value))
+    elif task == OTHER_ATTENDEES:
+      if len(value): print(value)
+    elif task == STANDARD_ITEMS:
+      print('\n\033[4mAgenda Items\033[0m')
+      print('\n'.join(value))
+    elif task == OTHER_ITEMS_COMBO:
+      for number_dd, number_tb, title, text, resolution, classification, in \
+        zip(validated_stride(value, OTHER_ITEMS_STANDARD_NUMBER, 0, 6),
+            validated_stride(value, OTHER_ITEMS_OTHER_NUMBER,    1, 6),
+            validated_stride(value, OTHER_ITEMS_TITLE,           2, 6),
+            validated_stride(value, OTHER_ITEMS_TEXT,            3, 6),
+            validated_stride(value, OTHER_ITEMS_RESOLUTION,      4, 6),
+            validated_stride(value, OTHER_ITEMS_CLASSIFICATION,  5, 6)):
+        number = dropdown_value(number_dd, number_tb)
+        title = title['value']; text = text['value']; resolution = resolution['value']; classification = ['classification_value']
+        print(f'{number}. ', end = '')
+        if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
+        if len(text):  print(text, end = ': ')
+        print(resolution)
+    elif task == COMMENTS:
+      print(f'Comments: {value}')
+    elif task in SKIP: continue
+    else: exit(f'Unknown task: {task}\n{value}')
+
+
 parser = argparse.ArgumentParser(
   description='''Aggregate data from S&B workflows''',
   epilog="Example: ./aggregate.py",
@@ -245,7 +293,7 @@ for workflow in workflow_list:
       print()
     elif workflow == 'Minutes':
       if control == 'Front page, with attendance list':
-        print(control)
+        minutes_front(page, annotations, front_minutes)
       elif control == 'Other page':
         print(control)
       elif control == 'Blank page':
