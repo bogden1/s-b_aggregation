@@ -20,12 +20,16 @@ WORKFLOWS = {
   },
 }
 
-def validate(expected_task, annotation):
-  if isinstance(expected_task, str): expected_task = [expected_task]
+#expected_tasks can be scalar or sequence
+#if a scalar, there is only one legal task for the annotation
+#if a sequence, any of the given tasks is legal for the annotation
+def validate(expected_tasks, annotation):
+  if isinstance(expected_tasks, str): expected_tasks = [expected_tasks]
   task = annotation['task']
-  if not task in expected_task:
-    exit(f'Invalid task type {task}: expected {expected_task}')
+  if not task in expected_tasks:
+    exit(f'Invalid task type {task}: expected {expected_tasks}')
 
+#There has never yet been a case where I need multiple expected tasks for dropdowns
 def get_dropdown_value(expected_dropdown_task, dropdown_annotation, expected_textbox_task, textbox_annotation):
   validate(expected_dropdown_task, dropdown_annotation)
   validate(expected_textbox_task, textbox_annotation)
@@ -39,8 +43,8 @@ def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_t
   return [get_dropdown_value(expected_dropdown_task, dd, expected_textbox_task, tb) for dd, tb in \
     zip(dropdown_annotations, textbox_annotations)]
 
-def get_value(expected_task, annotation):
-  validate(expected_task, annotation)
+def get_value(expected_tasks, annotation):
+  validate(expected_tasks, annotation)
   return annotation['value']
 
 def get_values(expected_tasks, annotations):
@@ -95,6 +99,9 @@ def index_other(page_data, annotations, other_index):
       heading_stored = False
     elif task == SUBJECT_PAGES:
       #Subject and Pages group pairwise
+      #TODO: Do I need to make sure that subject task matches page task, or is that already covered somehow?
+      #      If I do need to make sure, then I likely don't need validate() to be able to cope with multiple
+      #      valid task types any more.
       for subject, pagerefs in \
         zip(get_values(SUBJECT, value[0::2]),
             get_values(PAGES,   value[1::2])):
