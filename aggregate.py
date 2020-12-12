@@ -30,7 +30,7 @@ def validate(expected_tasks, annotation):
     exit(f'Invalid task type {task}: expected {expected_tasks}')
 
 #There has never yet been a case where I need multiple expected tasks for dropdowns
-def get_dropdown_value(expected_dropdown_task, dropdown_annotation, expected_textbox_task, textbox_annotation):
+def get_dropdown_textbox_value(expected_dropdown_task, dropdown_annotation, expected_textbox_task, textbox_annotation):
   validate(expected_dropdown_task, dropdown_annotation)
   validate(expected_textbox_task, textbox_annotation)
   value = dropdown_annotation['value']
@@ -39,8 +39,8 @@ def get_dropdown_value(expected_dropdown_task, dropdown_annotation, expected_tex
   if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value'].strip()
   else: return value['label']
 
-def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_textbox_task, textbox_annotations):
-  return [get_dropdown_value(expected_dropdown_task, dd, expected_textbox_task, tb) for dd, tb in \
+def get_dropdown_textbox_values(expected_dropdown_task, dropdown_annotations, expected_textbox_task, textbox_annotations):
+  return [get_dropdown_textbox_value(expected_dropdown_task, dd, expected_textbox_task, tb) for dd, tb in \
     zip(dropdown_annotations, textbox_annotations)]
 
 def get_value(expected_tasks, annotation):
@@ -158,8 +158,8 @@ def index_names(page_data, annotations, name_index, other_index):
       for surname, forename, title, position, subject, pagerefs in \
         zip(get_values(SURNAME,           value[0::8]),
             get_values(FORENAME,          value[1::8]),
-            get_dropdown_values(TITLE_STANDARD, value[2::8], TITLE_OTHER, value[3::8]),
-            get_dropdown_values(POSITION_STANDARD, value[4::8], POSITION_OTHER, value[5::8]),
+            get_dropdown_textbox_values(TITLE_STANDARD, value[2::8], TITLE_OTHER, value[3::8]),
+            get_dropdown_textbox_values(POSITION_STANDARD, value[4::8], POSITION_OTHER, value[5::8]),
             get_values(SUBJECT,           value[6::8]),
             get_values(PAGES,             value[7::8])):
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pagerefs}')
@@ -221,7 +221,7 @@ def minutes_front(page_data, annotations, front_minutes):
       print('\n\033[4mAgenda Items\033[0m')
       print('\n'.join(value))
     elif task == OTHER_ITEMS_COMBO:
-      number = get_dropdown_value(OTHER_ITEMS_STANDARD_NUMBER, value[0], OTHER_ITEMS_OTHER_NUMBER, value[1])
+      number = get_dropdown_textbox_value(OTHER_ITEMS_STANDARD_NUMBER, value[0], OTHER_ITEMS_OTHER_NUMBER, value[1])
       title, text, resolution, classification = [get_value(x, y) for x, y in \
         zip([OTHER_ITEMS_TITLE, OTHER_ITEMS_TEXT, OTHER_ITEMS_RESOLUTION, OTHER_ITEMS_CLASSIFICATION], value[2:])]
       print(f'{number}. ', end = '')
