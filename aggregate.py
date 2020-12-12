@@ -36,7 +36,7 @@ def get_dropdown_value(expected_dropdown_task, dropdown_annotation, expected_tex
   value = dropdown_annotation['value']
   if len(value) != 1: exit(f'Bad dropdown: too many values: {value}')
   value = value[0]
-  if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value']
+  if (not 'option' in value) or (value['option'] == False): return textbox_annotation['value'].strip()
   else: return value['label']
 
 def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_textbox_task, textbox_annotations):
@@ -46,7 +46,7 @@ def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_t
 def get_value(expected_tasks, annotation):
   validate(expected_tasks, annotation)
   value = annotation['value']
-  if isinstance(value, str): return value
+  if isinstance(value, str): return value.strip()
   else:
     if len(value) != 1: exit(f'Bad value: too many values: {value}')
     return value[0]['label']
