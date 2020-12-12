@@ -45,7 +45,11 @@ def get_dropdown_values(expected_dropdown_task, dropdown_annotations, expected_t
 
 def get_value(expected_tasks, annotation):
   validate(expected_tasks, annotation)
-  return annotation['value']
+  value = annotation['value']
+  if isinstance(value, str): return value
+  else:
+    if len(value) != 1: exit(f'Bad value: too many values: {value}')
+    return value[0]['label']
 
 def get_values(expected_tasks, annotations):
   return [get_value(expected_tasks, x) for x in annotations]
@@ -223,7 +227,9 @@ def minutes_front(page_data, annotations, front_minutes):
       print(f'{number}. ', end = '')
       if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
       if len(text):  print(text, end = ': ')
-      print(resolution)
+      print(resolution, end =' ')
+      if len(classification): print(f'({classification})', end = '')
+      print()
     elif task == COMMENTS:
       print(f'Comments: {value}')
     elif task in SKIP: continue
