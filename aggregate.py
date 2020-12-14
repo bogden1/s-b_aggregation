@@ -45,7 +45,7 @@ def validate(expected_tasks, annotation):
   if isinstance(expected_tasks, str): expected_tasks = [expected_tasks]
   task = annotation['task']
   if not task in expected_tasks:
-    exit(f'Invalid task type {task}: expected {expected_tasks}')
+    raise Exception(f'Invalid task type {task}: expected {expected_tasks}')
 
 #There has never yet been a case where I need multiple expected tasks for dropdowns
 def get_dropdown_textbox_value(expected_dropdown_task, dropdown_annotation, expected_textbox_task, textbox_annotation):
