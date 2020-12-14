@@ -227,11 +227,11 @@ def minutes_front(page_data, annotations, front_minutes):
 
   page_number = page_data['page']
   entry = 0
-  print('\033[4mAttendees\033[0m')
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
     if task == STANDARD_ATTENDEES:
+      print('\033[4mAttendees\033[0m')
       print('\n'.join(value))
     elif task == OTHER_ATTENDEES:
       if len(value): print(value)
