@@ -231,7 +231,8 @@ def minutes_front(page_data, annotations, front_minutes):
       if len(classification): print(f'({classification})', end = '')
       print()
     elif task == COMMENTS:
-      print(f'Comments: {value}')
+      if len(value.strip()) != 0:
+        print(f'Comments: {value}')
     elif task in SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
