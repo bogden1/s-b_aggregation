@@ -6,15 +6,23 @@ import json
 import os
 import sys
 import re
+from enum import Enum, unique
 
 import pandas as pd
 
+@unique
+class WorkflowType(Enum):
+  INDEX = 1
+  MINUTES = 2
+
 WORKFLOWS = {
  'Index': {
+    'type': WorkflowType.INDEX,
     'id': 16866, #Alpha-Index
     'version': 11.28, #Alpha-Index
   },
   'Minutes': {
+    'type': WorkflowType.MINUTES,
     'id': 16890, #Alpha-Minutes
     'version': 4.9, #Alpha-Minutes
   },
@@ -268,8 +276,9 @@ classifications = pd.read_csv(args.classifications)
 
 for workflow in workflow_list:
   workflow_data = WORKFLOWS[workflow]
+  workflow_type = workflow_data['type']
   #Heading
-  print(f'### {workflow} {workflow_data["version"]} ({os.path.basename(args.classifications)})')
+  print(f'### {workflow} ({workflow_type.name}) {workflow_data["version"]} ({os.path.basename(args.classifications)})')
 
   workflow_classifications = classifications.loc[(classifications['workflow_id'] == workflow_data['id']) &
                                                  (classifications['workflow_version'] == workflow_data['version'])]
@@ -292,7 +301,7 @@ for workflow in workflow_list:
   for (page, annotations) in pages:
     print(f'* Page: {page["page"]}')
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
-    if workflow == 'Index':
+    if workflow_type == WorkflowType.INDEX:
       if control == 'Other page':
         index_other(page, annotations, other_index)
       elif control == 'Name list':
@@ -302,7 +311,7 @@ for workflow in workflow_list:
         continue
       else: exit(f"Bad control switch: \"{control}\"")
       print()
-    elif workflow == 'Minutes':
+    elif workflow_type == WorkflowType.MINUTES:
       if control == 'Front page, with attendance list':
         minutes_front(page, annotations, front_minutes)
       elif control == 'Other page':
@@ -313,13 +322,13 @@ for workflow in workflow_list:
       else: exit(f"Bad control switch: \"{control}\"")
       print()
     else:
-      exit(f'Bad workflow: "{workflow}"')
+      exit(f'Bad workflow type: "{workflow_type}"')
 
-  if workflow == 'Index':
+  if workflow_type == WorkflowType.INDEX:
     pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
     pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
       sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
-  elif workflow == 'Minutes':
+  elif workflow_type == WorkflowType.MINUTES:
     pd.DataFrame(front_minutes).to_csv(path_or_buf = 'Minutes.csv', index = False) #COLUMNS TODO
 
