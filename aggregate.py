@@ -221,12 +221,23 @@ def minutes_front(page_data, annotations, front_minutes):
   AGENDA_TEXT = 'T5'
   AGENDA_RESOLUTION = 'T6'
   AGENDA_CLASSIFICATION = 'T10'
+
+  TABLE_HEADERS_COMBO = 'T25'
+  TABLE_STANDARD_NUMBER = 'T23'
+  TABLE_TITLE = 'T24'
+  TABLE_COL_HEAD = ['T47', 'T48', 'T49', 'T50', 'T51', 'T52']
+  TABLE_ENTRIES_COMBO = 'T36'
+  TABLE_ROWS = ['T30', 'T31', 'T32', 'T33', 'T34', 'T35']
+  TABLE_NEXT = 'T37'
+
   COMMENTS = 'T28'
-  SKIP = ['T15', 'T55'] #T15: 'Are there any non-standard minutes to transcribe?'
-                        #T55: 'Is there another agenda item to transcribe?'
+  SKIP = ['T8', 'T15', 'T55'] #T8: 'Is there a table on the page?'
+                              #T15: 'Are there any non-standard minutes to transcribe?'
+                              #T55: 'Is there another agenda item to transcribe?'
 
   page_number = page_data['page']
   entry = 0
+  table_counter = 0
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
@@ -248,6 +259,31 @@ def minutes_front(page_data, annotations, front_minutes):
       print(resolution, end =' ')
       if len(classification): print(f'({classification})', end = '')
       print()
+    elif task == TABLE_HEADERS_COMBO:
+      table_counter += 1
+
+      number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
+      title = get_value(TABLE_TITLE, value[2])
+      headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
+
+      print(f"Table {table_counter} in item {number}")
+      for x in headings:
+        if len(x) == 0: break
+        print(f'\033[4m{x}\033[0m', end = ',')
+      print()
+    elif task == TABLE_ENTRIES_COMBO:
+      cells = [get_value(x, y) for x, y in zip(TABLE_ROWS, value)]
+      for x in cells:
+        if len(x) == 0: break
+        print(x, end = ',')
+      print()
+    elif task == TABLE_NEXT:
+      if value == 'Another row': None
+      elif value == 'Another table': print()
+      elif value[0:8] == 'Nothing:':
+        table_counter = 0
+        print()
+      else: raise Exception('Bad value')
     elif task == COMMENTS:
       if len(value.strip()) != 0:
         print(f'Comments: {value}')
