@@ -263,13 +263,14 @@ args = parser.parse_args()
 workflow_list = []
 for x in args.workflow:
   parts = x.split(':')
-  if len(parts) == 3:
-    if not parts[0] in WORKFLOWS:
-      exit(f'Bad args: {parts[0]} is not a key in WORKFLOWS')
+  if len(parts) == 4:
+    if parts[0] in WORKFLOWS:
+      print(f'Warning: replacing {parts[0]} in WORKFLOWS')
     workflow_list.append(parts[0])
     WORKFLOWS[parts[0]] = {
-      'id': int(parts[1]),
-      'version': float(parts[2]),
+      'type': WorkflowType[parts[1].upper()],
+      'id': int(parts[2]),
+      'version': float(parts[3]),
     }
   elif len(parts) == 1:
     workflow_list.append(parts[0])
