@@ -1,0 +1,19 @@
+### NewTable (MINUTES) 32.62 (rowtable.csv)
+* Page: 393
+Table 1 in item 1
+[4mFirst Column Heading[0m,[4mSecond Column Heading[0m,[4mThird Column Heading[0m,
+1.1,1.2,1.3,
+2.1,2.2,2.3,
+3.1,3.2,3.3,
+
+Table 2 in item ii
+[4mHead1[0m,[4mHead2[0m,
+i.i,i.ii,i.iii,
+ii.i,ii.ii,ii.iii,
+
+1. [4mItem holding 1st fake table[0m Text1: Resolution1 (Admissions (in-pension) (Chelsea))
+ii. [4mItem title for 2nd table[0m Item text for second table: Resolution text for second table (Buildings)
+Comments: 1.2 means 1st row, second column.
+I used arabic numerals in 1st table
+I used roman numerals in 2nd table
+

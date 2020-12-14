@@ -359,14 +359,12 @@ for workflow in workflow_list:
       else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.MINUTES:
-      if control == 'Front page, with attendance list':
-        minutes_front(page, annotations, front_minutes)
-      elif control == 'Other page':
-        print(control)
-      elif control == 'Blank page':
+      #if control == 'Front page, with attendance list':
+      if control == 'Blank page':
         print('*** BLANK ***')
         continue
-      else: exit(f"Bad control switch: \"{control}\"")
+      else:
+        minutes_front(page, annotations, front_minutes)
       print()
     else:
       exit(f'Bad workflow type: "{workflow_type}"')
