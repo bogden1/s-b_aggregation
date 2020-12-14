@@ -213,14 +213,14 @@ def index_names(page_data, annotations, name_index, other_index):
 def minutes_front(page_data, annotations, front_minutes):
   STANDARD_ATTENDEES = 'T9'
   OTHER_ATTENDEES = 'T3'
-  STANDARD_ITEMS = 'T14'
-  OTHER_ITEMS_COMBO = 'T7'
-  OTHER_ITEMS_STANDARD_NUMBER = 'T12'
-  OTHER_ITEMS_OTHER_NUMBER = 'T54'
-  OTHER_ITEMS_TITLE = 'T13'
-  OTHER_ITEMS_TEXT = 'T5'
-  OTHER_ITEMS_RESOLUTION = 'T6'
-  OTHER_ITEMS_CLASSIFICATION = 'T10'
+  STANDARD_AGENDA = 'T14'
+  AGENDA_COMBO = 'T7'
+  AGENDA_STANDARD_NUMBER = 'T12'
+  AGENDA_OTHER_NUMBER = 'T54'
+  AGENDA_TITLE = 'T13'
+  AGENDA_TEXT = 'T5'
+  AGENDA_RESOLUTION = 'T6'
+  AGENDA_CLASSIFICATION = 'T10'
   COMMENTS = 'T28'
   SKIP = ['T15', 'T55'] #T15: 'Are there any non-standard minutes to transcribe?'
                         #T55: 'Is there another agenda item to transcribe?'
@@ -235,13 +235,13 @@ def minutes_front(page_data, annotations, front_minutes):
       print('\n'.join(value))
     elif task == OTHER_ATTENDEES:
       if len(value): print(value)
-    elif task == STANDARD_ITEMS:
+    elif task == STANDARD_AGENDA:
       print('\n\033[4mAgenda Items\033[0m')
       print('\n'.join(value))
-    elif task == OTHER_ITEMS_COMBO:
-      number = get_dropdown_textbox_value(OTHER_ITEMS_STANDARD_NUMBER, value[0], OTHER_ITEMS_OTHER_NUMBER, value[1])
+    elif task == AGENDA_COMBO:
+      number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], AGENDA_OTHER_NUMBER, value[1])
       title, text, resolution, classification = [get_value(x, y) for x, y in \
-        zip([OTHER_ITEMS_TITLE, OTHER_ITEMS_TEXT, OTHER_ITEMS_RESOLUTION, OTHER_ITEMS_CLASSIFICATION], value[2:])]
+        zip([AGENDA_TITLE, AGENDA_TEXT, AGENDA_RESOLUTION, AGENDA_CLASSIFICATION], value[2:])]
       print(f'{number}. ', end = '')
       if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
       if len(text):  print(text, end = ': ')
