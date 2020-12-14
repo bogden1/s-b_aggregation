@@ -16,15 +16,20 @@ class WorkflowType(Enum):
   MINUTES = 2
 
 WORKFLOWS = {
- 'Index': {
+ 'Alpha-Index': {
     'type': WorkflowType.INDEX,
-    'id': 16866, #Alpha-Index
-    'version': 11.28, #Alpha-Index
+    'id': 16866,
+    'version': 11.28,
   },
-  'Minutes': {
+  'Alpha-Names': {
+    'type': WorkflowType.INDEX,
+    'id': 16899,
+    'version': 1.1,
+  },
+  'Alpha-Minutes': {
     'type': WorkflowType.MINUTES,
-    'id': 16890, #Alpha-Minutes
-    'version': 4.9, #Alpha-Minutes
+    'id': 16890,
+    'version': 4.9,
   },
 }
 
