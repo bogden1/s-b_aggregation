@@ -216,7 +216,7 @@ def minutes_front(page_data, annotations, front_minutes):
   STANDARD_AGENDA = 'T14'
   AGENDA_COMBO = 'T7'
   AGENDA_STANDARD_NUMBER = 'T12'
-  AGENDA_OTHER_NUMBER = 'T54'
+  OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
   AGENDA_TITLE = 'T13'
   AGENDA_TEXT = 'T5'
   AGENDA_RESOLUTION = 'T6'
@@ -239,7 +239,7 @@ def minutes_front(page_data, annotations, front_minutes):
       print('\n\033[4mAgenda Items\033[0m')
       print('\n'.join(value))
     elif task == AGENDA_COMBO:
-      number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], AGENDA_OTHER_NUMBER, value[1])
+      number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
       title, text, resolution, classification = [get_value(x, y) for x, y in \
         zip([AGENDA_TITLE, AGENDA_TEXT, AGENDA_RESOLUTION, AGENDA_CLASSIFICATION], value[2:])]
       print(f'{number}. ', end = '')
