@@ -31,6 +31,11 @@ WORKFLOWS = {
     'id': 16890,
     'version': 4.9,
   },
+  'Alpha-Tables': {
+    'type': WorkflowType.MINUTES,
+    'id': 16863,
+    'version': 19.48,
+  },
 }
 
 #expected_tasks can be scalar or sequence
