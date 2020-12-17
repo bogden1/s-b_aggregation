@@ -338,7 +338,7 @@ def minutes_front(table_function, page_data, annotations, attendees, items, comm
     elif task == AGENDA_COMBO:
       number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
       try:
-        number = int(number) #TODO: Catch the exception when a non-standard numbers is not an int
+        number = int(number)
       except ValueError:
         sys.stderr.write(f'Item "{number}" on p. {page_number} is not an integer\n')
       title, text, resolution, classification = [get_value(x, y) for x, y in \
