@@ -315,7 +315,7 @@ def minutes_front(table_function, page_data, annotations, front_minutes):
                               #T15: 'Are there any non-standard minutes to transcribe?'
                               #T55: 'Is there another agenda item to transcribe?'
 
-  page_number = page_data['page']
+  page_number = int(page_data['page'])
   entry = 0
   table_function.counter = 0
   for annotation in annotations:
@@ -331,6 +331,10 @@ def minutes_front(table_function, page_data, annotations, front_minutes):
       print('\n'.join(value))
     elif task == AGENDA_COMBO:
       number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
+      try:
+        number = int(number) #TODO: Catch the exception when a non-standard numbers is not an int
+      except ValueError:
+        sys.stderr.write(f'Item "{number}" on p. {page_number} is not an integer\n')
       title, text, resolution, classification = [get_value(x, y) for x, y in \
         zip([AGENDA_TITLE, AGENDA_TEXT, AGENDA_RESOLUTION, AGENDA_CLASSIFICATION], value[2:])]
       print(f'{number}. ', end = '')
