@@ -212,18 +212,7 @@ def index_names(page_data, annotations, name_index, other_index):
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
-def minutes_front_alpha(page_data, annotations, front_minutes):
-  STANDARD_ATTENDEES = 'T9'
-  OTHER_ATTENDEES = 'T3'
-  STANDARD_AGENDA = 'T14'
-  AGENDA_COMBO = 'T7'
-  AGENDA_STANDARD_NUMBER = 'T12'
-  OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
-  AGENDA_TITLE = 'T13'
-  AGENDA_TEXT = 'T5'
-  AGENDA_RESOLUTION = 'T6'
-  AGENDA_CLASSIFICATION = 'T10'
-
+def tables_alpha(task, value):
   TABLE_FIRST_COMBO = 'T25'
   TABLE_STANDARD_NUMBER = 'T23'
   TABLE_TITLE = 'T24'
@@ -236,6 +225,91 @@ def minutes_front_alpha(page_data, annotations, front_minutes):
   TABLE_MORE_ROWS = ['T39', 'T40', 'T41', 'T42', 'T43', 'T44', 'T45']
   TABLE_NEXT = 'T37'
 
+  if task == TABLE_FIRST_COMBO:
+    tables_alpha.counter += 1
+
+    number = get_value(TABLE_STANDARD_NUMBER, value[0])
+    title = get_value(TABLE_TITLE, value[1])
+    print(f"Table {tables_alpha.counter} in item {number}")
+    print(f'\033[4m{title}\033[0m')
+    heading = get_value(TABLE_FIRST_HEADING, value[2])
+    column = [get_value(x, y) for x, y in zip(TABLE_FIRST_ROWS, value[3:])] #This will match each task to the particular value
+    tables_alpha.table = [[f'*{heading}*']]
+    tables_alpha.table[-1].extend(column)
+    #print(f'Init: {pd.DataFrame(tables_alpha.table)}')
+  elif task == TABLE_ROWS_COMBO:
+    heading = get_value(TABLE_ROWS_HEADING, value[0])
+    column = [get_value(x, y) for x, y in zip(TABLE_ROWS, value[1:])]
+    tables_alpha.table.append([f'*{heading}*'])
+    tables_alpha.table[-1].extend(column)
+    #print(f'Append: {pd.DataFrame(tables_alpha.table)}')
+  elif task == TABLE_MORE_ROWS_COMBO:
+    column = [get_value(x, y) for x, y in zip(TABLE_MORE_ROWS, value)]
+    #print(f'Extend1: {pd.DataFrame(tables_alpha.table)}')
+    tables_alpha.table[-1].extend(column)
+    #print(f'Extend2: {pd.DataFrame(tables_alpha.table)}')
+  elif task == TABLE_NEXT:
+    if value == 'More rows in this column': None
+    elif value == 'Another column': None
+    elif value == 'Another table':
+      print(pd.DataFrame(tables_alpha.table).transpose())
+      print()
+    elif value[0:8] == 'Nothing ':
+      tables_alpha.counter = 0
+      print(pd.DataFrame(tables_alpha.table).transpose())
+      print()
+    else: raise Exception(f'Bad value: {value}')
+  else: exit(f'Unknown task: {task}\n{value}')
+
+def tables(task, value):
+  TABLE_HEADERS_COMBO = 'T25'
+  TABLE_STANDARD_NUMBER = 'T23'
+  TABLE_TITLE = 'T24'
+  TABLE_COL_HEAD = ['T47', 'T48', 'T49', 'T50', 'T51', 'T52']
+  TABLE_ENTRIES_COMBO = 'T36'
+  TABLE_ROWS = ['T30', 'T31', 'T32', 'T33', 'T34', 'T35']
+  TABLE_NEXT = 'T37'
+  OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
+
+  if task == TABLE_HEADERS_COMBO:
+    tables.counter += 1
+
+    number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
+    title = get_value(TABLE_TITLE, value[2])
+    headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
+
+    print(f"Table {tables.counter} in item {number}")
+    for x in headings:
+      if len(x) == 0: break
+      print(f'\033[4m{x}\033[0m', end = ',')
+    print()
+  elif task == TABLE_ENTRIES_COMBO:
+    cells = [get_value(x, y) for x, y in zip(TABLE_ROWS, value)]
+    for x in cells:
+      if len(x) == 0: break
+      print(x, end = ',')
+    print()
+  elif task == TABLE_NEXT:
+    if value == 'Another row': None
+    elif value == 'Another table': print()
+    elif value[0:8] == 'Nothing:':
+      tables.counter = 0
+      print()
+    else: raise Exception('Bad value')
+  else: exit(f'Unknown task: {task}\n{value}')
+
+def minutes_front(table_function, page_data, annotations, front_minutes):
+  STANDARD_ATTENDEES = 'T9'
+  OTHER_ATTENDEES = 'T3'
+  STANDARD_AGENDA = 'T14'
+  AGENDA_COMBO = 'T7'
+  AGENDA_STANDARD_NUMBER = 'T12'
+  OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
+  AGENDA_TITLE = 'T13'
+  AGENDA_TEXT = 'T5'
+  AGENDA_RESOLUTION = 'T6'
+  AGENDA_CLASSIFICATION = 'T10'
+
   COMMENTS = 'T28'
   SKIP = ['T8', 'T15', 'T55'] #T8: 'Is there a table on the page?'
                               #T15: 'Are there any non-standard minutes to transcribe?'
@@ -243,8 +317,7 @@ def minutes_front_alpha(page_data, annotations, front_minutes):
 
   page_number = page_data['page']
   entry = 0
-  table_counter = 0
-  table = []
+  table_function.counter = 0
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
@@ -271,125 +344,11 @@ def minutes_front_alpha(page_data, annotations, front_minutes):
       print('\033[3mResolution\033[0m')
       print(resolution)
       print()
-    elif task == TABLE_FIRST_COMBO:
-      table_counter += 1
-
-      number = get_value(TABLE_STANDARD_NUMBER, value[0])
-      title = get_value(TABLE_TITLE, value[1])
-      print(f"Table {table_counter} in item {number}")
-      print(f'\033[4m{title}\033[0m')
-      heading = get_value(TABLE_FIRST_HEADING, value[2])
-      column = [get_value(x, y) for x, y in zip(TABLE_FIRST_ROWS, value[3:])] #This will match each task to the particular value
-      table = [[f'*{heading}*']]
-      table[-1].extend(column)
-      #print(f'Init: {pd.DataFrame(table)}')
-    elif task == TABLE_ROWS_COMBO:
-      heading = get_value(TABLE_ROWS_HEADING, value[0])
-      column = [get_value(x, y) for x, y in zip(TABLE_ROWS, value[1:])]
-      table.append([f'*{heading}*'])
-      table[-1].extend(column)
-      #print(f'Append: {pd.DataFrame(table)}')
-    elif task == TABLE_MORE_ROWS_COMBO:
-      column = [get_value(x, y) for x, y in zip(TABLE_MORE_ROWS, value)]
-      #print(f'Extend1: {pd.DataFrame(table)}')
-      table[-1].extend(column)
-      #print(f'Extend2: {pd.DataFrame(table)}')
-    elif task == TABLE_NEXT:
-      if value == 'More rows in this column': None
-      elif value == 'Another column': None
-      elif value == 'Another table':
-        print(pd.DataFrame(table).transpose())
-        print()
-      elif value[0:8] == 'Nothing ':
-        table_counter = 0
-        print(pd.DataFrame(table).transpose())
-        print()
-      else: raise Exception(f'Bad value: {value}')
     elif task == COMMENTS:
       if len(value.strip()) != 0:
         print(f'Comments: {value}')
     elif task in SKIP: continue
-    else: exit(f'Unknown task: {task}\n{value}')
-
-def minutes_front(page_data, annotations, front_minutes):
-  STANDARD_ATTENDEES = 'T9'
-  OTHER_ATTENDEES = 'T3'
-  STANDARD_AGENDA = 'T14'
-  AGENDA_COMBO = 'T7'
-  AGENDA_STANDARD_NUMBER = 'T12'
-  OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
-  AGENDA_TITLE = 'T13'
-  AGENDA_TEXT = 'T5'
-  AGENDA_RESOLUTION = 'T6'
-  AGENDA_CLASSIFICATION = 'T10'
-
-  TABLE_HEADERS_COMBO = 'T25'
-  TABLE_STANDARD_NUMBER = 'T23'
-  TABLE_TITLE = 'T24'
-  TABLE_COL_HEAD = ['T47', 'T48', 'T49', 'T50', 'T51', 'T52']
-  TABLE_ENTRIES_COMBO = 'T36'
-  TABLE_ROWS = ['T30', 'T31', 'T32', 'T33', 'T34', 'T35']
-  TABLE_NEXT = 'T37'
-
-  COMMENTS = 'T28'
-  SKIP = ['T8', 'T15', 'T55'] #T8: 'Is there a table on the page?'
-                              #T15: 'Are there any non-standard minutes to transcribe?'
-                              #T55: 'Is there another agenda item to transcribe?'
-
-  page_number = page_data['page']
-  entry = 0
-  table_counter = 0
-  for annotation in annotations:
-    task = annotation['task']
-    value = annotation['value']
-    if task == STANDARD_ATTENDEES:
-      print('\033[4mAttendees\033[0m')
-      print('\n'.join(value))
-    elif task == OTHER_ATTENDEES:
-      if len(value): print(value)
-    elif task == STANDARD_AGENDA:
-      print('\n\033[4mAgenda Items\033[0m')
-      print('\n'.join(value))
-    elif task == AGENDA_COMBO:
-      number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
-      title, text, resolution, classification = [get_value(x, y) for x, y in \
-        zip([AGENDA_TITLE, AGENDA_TEXT, AGENDA_RESOLUTION, AGENDA_CLASSIFICATION], value[2:])]
-      print(f'{number}. ', end = '')
-      if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
-      if len(text):  print(text, end = ': ')
-      print(resolution, end =' ')
-      if len(classification): print(f'({classification})', end = '')
-      print()
-    elif task == TABLE_HEADERS_COMBO:
-      table_counter += 1
-
-      number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
-      title = get_value(TABLE_TITLE, value[2])
-      headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
-
-      print(f"Table {table_counter} in item {number}")
-      for x in headings:
-        if len(x) == 0: break
-        print(f'\033[4m{x}\033[0m', end = ',')
-      print()
-    elif task == TABLE_ENTRIES_COMBO:
-      cells = [get_value(x, y) for x, y in zip(TABLE_ROWS, value)]
-      for x in cells:
-        if len(x) == 0: break
-        print(x, end = ',')
-      print()
-    elif task == TABLE_NEXT:
-      if value == 'Another row': None
-      elif value == 'Another table': print()
-      elif value[0:8] == 'Nothing:':
-        table_counter = 0
-        print()
-      else: raise Exception('Bad value')
-    elif task == COMMENTS:
-      if len(value.strip()) != 0:
-        print(f'Comments: {value}')
-    elif task in SKIP: continue
-    else: exit(f'Unknown task: {task}\n{value}')
+    else: table_function(task, value)
 
   #Return multiple dataframes
   #1) Date, page, attendee (one row for each attendee)
@@ -472,12 +431,12 @@ for workflow in workflow_list:
          (workflow_data['id'] == 16863 and workflow_data['version'] == 19.48):
         if control == 'Front page, with attendance list' or \
            control == 'Other page':
-          minutes_front_alpha(page, annotations, front_minutes)
+          minutes_front(tables_alpha, page, annotations, front_minutes)
         else: exit(f"Bad control switch for alpha workflows: \"{control}\"")
       else:
         if control == 'Front page, with attendance list' or \
            control == 'Another page of meeting minutes':
-          minutes_front(page, annotations, front_minutes)
+          minutes_front(tables, page, annotations, front_minutes)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     else:

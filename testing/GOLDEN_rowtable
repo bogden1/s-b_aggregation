@@ -11,8 +11,20 @@ Table 2 in item ii
 i.i,i.ii,i.iii,
 ii.i,ii.ii,ii.iii,
 
-1. [4mItem holding 1st fake table[0m Text1: Resolution1 (Admissions (in-pension) (Chelsea))
-ii. [4mItem title for 2nd table[0m Item text for second table: Resolution text for second table (Buildings)
+1. [4mItem holding 1st fake table[0m [3mAdmissions (in-pension) (Chelsea)[0m
+[3mText[0m
+Text1
+
+[3mResolution[0m
+Resolution1
+
+ii. [4mItem title for 2nd table[0m [3mBuildings[0m
+[3mText[0m
+Item text for second table
+
+[3mResolution[0m
+Resolution text for second table
+
 Comments: 1.2 means 1st row, second column.
 I used arabic numerals in 1st table
 I used roman numerals in 2nd table
