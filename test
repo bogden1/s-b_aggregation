@@ -1,16 +1,16 @@
 #!/bin/bash
 cd testing
-../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Names | diff -s GOLDEN_NAMES - && \
-diff -s Index.csv GOLDEN_NameIndex.csv && \
-diff -s Names.csv GOLDEN_Names.csv && \
-../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -s GOLDEN_INDEX - && \
-diff -s Index.csv GOLDEN_INDEX.csv && \
-../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -s GOLDEN_Alpha_Minutes - && \
-../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Tables  | diff -s GOLDEN_Alpha_Tables - && \
-../aggregate.py rowtable.csv -w NewTable:Minutes:17077:32.62 | diff -s GOLDEN_rowtable - && \
-! ../aggregate.py test.csv && \
-! ../aggregate.py test1.csv && \
-! ../aggregate.py test2.csv && \
-! ../aggregate.py test3.csv && \
+../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Names | diff -qs GOLDEN_NAMES - && \
+diff -qs Index.csv GOLDEN_NameIndex.csv && \
+diff -qs Names.csv GOLDEN_Names.csv && \
+../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -qs GOLDEN_INDEX - && \
+diff -qs Index.csv GOLDEN_INDEX.csv && \
+../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -qs GOLDEN_Alpha_Minutes - && \
+../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Tables  | diff -qs GOLDEN_Alpha_Tables - && \
+../aggregate.py rowtable.csv -w NewTable:Minutes:17077:32.62 | diff -qs GOLDEN_rowtable - && \
+! ../aggregate.py test.csv >/dev/null && \
+! ../aggregate.py test1.csv >/dev/null && \
+! ../aggregate.py test2.csv >/dev/null && \
+! ../aggregate.py test3.csv >/dev/null && \
 echo -e '\033[0;32mTEST PASSED\033[0m' || \
 echo -e '\033[0;31mTEST FAILED\033[0m'
