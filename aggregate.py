@@ -389,6 +389,9 @@ if len(workflow_list) == 0: workflow_list = WORKFLOWS.keys()
 
 classifications = pd.read_csv(args.classifications)
 
+other_index = []
+name_index = []
+front_minutes= []
 for workflow in workflow_list:
   workflow_data = WORKFLOWS[workflow]
   workflow_type = workflow_data['type']
@@ -410,9 +413,6 @@ for workflow in workflow_list:
   if args.dump: print(json.dumps(pages, indent=2))
 
   #Read the transcriptions (using our knowledge about the workflows)
-  other_index = []
-  name_index = []
-  front_minutes = []
   for (page, annotations) in pages:
     print(f'* Page: {page["page"]}')
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
@@ -445,11 +445,12 @@ for workflow in workflow_list:
     else:
       exit(f'Bad workflow type: "{workflow_type}"')
 
-  if workflow_type == WorkflowType.INDEX:
-    pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
-      sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
-    pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
-      sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
-  elif workflow_type == WorkflowType.MINUTES:
-    pd.DataFrame(front_minutes).to_csv(path_or_buf = 'Minutes.csv', index = False) #COLUMNS TODO
+#Index
+pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+  sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
+pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+  sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
+
+#Minutes
+pd.DataFrame(front_minutes).to_csv(path_or_buf = 'Minutes.csv', index = False) #COLUMNS TODO
 
