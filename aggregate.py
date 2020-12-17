@@ -355,6 +355,9 @@ def minutes_front(table_function, page_data, annotations, front_minutes):
   #2) Date, page, agenda item number, agenda item title, agenda item text, agenda item resolution
   #3) Date, page, comments - refactor the way I do comments for the index before implementing this one
 
+#Examples:
+#./aggregate.py -w Alpha-Minutes Alpha-Tables NewTable:Minutes:17077:32.62
+#./aggregate.py testing/rowtable.csv -w NewTable:Minutes:17077:32.62
 
 parser = argparse.ArgumentParser(
   description='''Aggregate data from S&B workflows''',
