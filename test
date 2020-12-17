@@ -6,8 +6,17 @@ diff -qs Names.csv GOLDEN_Names.csv && \
 ../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -qs GOLDEN_INDEX - && \
 diff -qs Index.csv GOLDEN_INDEX.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -qs GOLDEN_Alpha_Minutes - && \
+diff -qs GOLDEN_Alpha-Minutes_Attendees.csv Attendees.csv && \
+diff -qs GOLDEN_Alpha-Minutes_Items.csv Items.csv && \
+diff -qs GOLDEN_Alpha-Minutes_Minutes-Comments.csv Minutes-Comments.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Tables  | diff -qs GOLDEN_Alpha_Tables - && \
+diff -qs GOLDEN_Alpha-Tables_Attendees.csv Attendees.csv && \
+diff -qs GOLDEN_Alpha-Tables_Items.csv Items.csv && \
+diff -qs GOLDEN_Alpha-Tables_Minutes-Comments.csv Minutes-Comments.csv && \
 ../aggregate.py rowtable.csv -w NewTable:Minutes:17077:32.62 | diff -qs GOLDEN_rowtable - && \
+diff -qs GOLDEN_rowtable_Attendees.csv Attendees.csv && \
+diff -qs GOLDEN_rowtable_Items.csv Items.csv && \
+diff -qs GOLDEN_rowtable_Minutes-Comments.csv Minutes-Comments.csv && \
 ! ../aggregate.py test.csv >/dev/null && \
 ! ../aggregate.py test1.csv >/dev/null && \
 ! ../aggregate.py test2.csv >/dev/null && \

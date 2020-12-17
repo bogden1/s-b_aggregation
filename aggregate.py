@@ -298,7 +298,7 @@ def tables(task, value):
     else: raise Exception('Bad value')
   else: exit(f'Unknown task: {task}\n{value}')
 
-def minutes_front(table_function, page_data, annotations, front_minutes):
+def minutes_front(table_function, page_data, annotations, attendees, items, comments):
   STANDARD_ATTENDEES = 'T9'
   OTHER_ATTENDEES = 'T3'
   STANDARD_AGENDA = 'T14'
@@ -324,11 +324,17 @@ def minutes_front(table_function, page_data, annotations, front_minutes):
     if task == STANDARD_ATTENDEES:
       print('\033[4mAttendees\033[0m')
       print('\n'.join(value))
+      for x in value: attendees.append([page_number, x.strip()])
     elif task == OTHER_ATTENDEES:
-      if len(value): print(value)
+      if len(value):
+        print(value)
+        for x in value.split('\n'):
+          attendees.append([page_number, x.strip()])
     elif task == STANDARD_AGENDA:
       print('\n\033[4mAgenda Items\033[0m')
       print('\n'.join(value))
+      for x in value:
+        items.append([page_number, int(x[0]), None, x[3:x.index(':')], x[x.index(':') + 1:], 'Front Page Item'])
     elif task == AGENDA_COMBO:
       number = get_dropdown_textbox_value(AGENDA_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
       try:
@@ -348,9 +354,11 @@ def minutes_front(table_function, page_data, annotations, front_minutes):
       print('\033[3mResolution\033[0m')
       print(resolution)
       print()
+      items.append([page_number, number, title, text, resolution, classification])
     elif task == COMMENTS:
       if len(value.strip()) != 0:
         print(f'Comments: {value}')
+        comments.append([page_number, value])
     elif task in SKIP: continue
     else: table_function(task, value)
 
@@ -395,7 +403,9 @@ classifications = pd.read_csv(args.classifications)
 
 other_index = []
 name_index = []
-front_minutes= []
+minutes_attendees = []
+minutes_items = []
+minutes_comments = []
 for workflow in workflow_list:
   workflow_data = WORKFLOWS[workflow]
   workflow_type = workflow_data['type']
@@ -438,12 +448,12 @@ for workflow in workflow_list:
          (workflow_data['id'] == 16863 and workflow_data['version'] == 19.48):
         if control == 'Front page, with attendance list' or \
            control == 'Other page':
-          minutes_front(tables_alpha, page, annotations, front_minutes)
+          minutes_front(tables_alpha, page, annotations, minutes_attendees, minutes_items, minutes_comments)
         else: exit(f"Bad control switch for alpha workflows: \"{control}\"")
       else:
         if control == 'Front page, with attendance list' or \
            control == 'Another page of meeting minutes':
-          minutes_front(tables, page, annotations, front_minutes)
+          minutes_front(tables, page, annotations, minutes_attendees, minutes_items, minutes_comments)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     else:
@@ -456,5 +466,10 @@ pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surna
   sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
 
 #Minutes
-pd.DataFrame(front_minutes).to_csv(path_or_buf = 'Minutes.csv', index = False) #COLUMNS TODO
+pd.DataFrame(minutes_attendees, columns = ['Page', 'Name']). \
+  sort_values(['Page', 'Name']).to_csv(path_or_buf = 'Attendees.csv', index = False)
+pd.DataFrame(minutes_items, columns = ['Page', 'Item', 'Title', 'Text', 'Resolution', 'Classification']). \
+  sort_values(['Page', 'Item']).to_csv(path_or_buf = 'Items.csv', index = False)
+pd.DataFrame(minutes_comments, columns = ['Page', 'Comments']). \
+  sort_values('Page').to_csv(path_or_buf = 'Minutes-Comments.csv', index = False)
 
