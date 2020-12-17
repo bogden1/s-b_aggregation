@@ -5,6 +5,8 @@ diff -s Index.csv GOLDEN_NameIndex.csv && \
 diff -s Names.csv GOLDEN_Names.csv && \
 ../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -s GOLDEN_INDEX - && \
 diff -s Index.csv GOLDEN_INDEX.csv && \
+../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -s GOLDEN_Alpha_Minutes - && \
+../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Tables  | diff -s GOLDEN_Alpha_Tables - && \
 ../aggregate.py rowtable.csv -w NewTable:Minutes:17077:32.62 | diff -s GOLDEN_rowtable - && \
 ! ../aggregate.py test.csv && \
 ! ../aggregate.py test1.csv && \

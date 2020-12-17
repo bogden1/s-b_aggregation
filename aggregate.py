@@ -262,9 +262,14 @@ def minutes_front_alpha(page_data, annotations, front_minutes):
         zip([AGENDA_TITLE, AGENDA_TEXT, AGENDA_RESOLUTION, AGENDA_CLASSIFICATION], value[2:])]
       print(f'{number}. ', end = '')
       if len(title): print(f'\033[4m{title}\033[0m ', end = '') #TODO: This should be empty, requires a fixup if it exists.
-      if len(text):  print(text, end = ': ')
-      print(resolution, end =' ')
-      if len(classification): print(f'({classification})', end = '')
+      if len(classification): print(f'\033[3m{classification}\033[0m', end = '')
+      if len(title) or len(classification): print()
+      print('\033[3mText\033[0m')
+      if len(text):
+        print(text)
+        print()
+      print('\033[3mResolution\033[0m')
+      print(resolution)
       print()
     elif task == TABLE_FIRST_COMBO:
       table_counter += 1
