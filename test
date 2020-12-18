@@ -1,12 +1,12 @@
 #!/bin/bash
 cd testing
-../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Names | diff -qs GOLDEN_NAMES - && \
-diff -qs Index.csv GOLDEN_NameIndex.csv && \
-diff -qs Names.csv GOLDEN_Names.csv && \
-diff -qs Comments.csv GOLDEN_Names_Comments.csv && \
-../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -qs GOLDEN_INDEX - && \
-diff -qs Index.csv GOLDEN_INDEX.csv && \
-diff -qs Comments.csv GOLDEN_Index_Comments.csv && \
+../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Names | diff -qs GOLDEN_Alpha-Names - && \
+diff -qs Index.csv GOLDEN_Alpha-Names_Index.csv && \
+diff -qs Names.csv GOLDEN_Alpha-Names_Names.csv && \
+diff -qs Comments.csv GOLDEN_Alpha-Names_Comments.csv && \
+../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -qs GOLDEN_Alpha-Index - && \
+diff -qs Index.csv GOLDEN_Alpha-Index_Index.csv && \
+diff -qs Comments.csv GOLDEN_Alpha-Index_Comments.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -qs GOLDEN_Alpha_Minutes - && \
 diff -qs GOLDEN_Alpha-Minutes_Attendees.csv Attendees.csv && \
 diff -qs GOLDEN_Alpha-Minutes_Items.csv Items.csv && \
