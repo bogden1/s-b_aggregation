@@ -288,6 +288,7 @@ def proc_tables(task, value):
     headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
 
     print(f"Table {proc_tables.counter} in item {item_number}")
+    print(f'\033[4m{title}\033[0m')
     for x in headings:
       if len(x) == 0: break
       print(f'\033[4m{x}\033[0m', end = ',')
