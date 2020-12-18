@@ -9,14 +9,17 @@ diff -qs Index.csv GOLDEN_INDEX.csv && \
 diff -qs GOLDEN_Alpha-Minutes_Attendees.csv Attendees.csv && \
 diff -qs GOLDEN_Alpha-Minutes_Items.csv Items.csv && \
 diff -qs GOLDEN_Alpha-Minutes_Minutes-Comments.csv Minutes-Comments.csv && \
+diff -qs GOLDEN_Alpha-Minutes_Tables.csv Tables.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Tables  | diff -qs GOLDEN_Alpha_Tables - && \
 diff -qs GOLDEN_Alpha-Tables_Attendees.csv Attendees.csv && \
 diff -qs GOLDEN_Alpha-Tables_Items.csv Items.csv && \
 diff -qs GOLDEN_Alpha-Tables_Minutes-Comments.csv Minutes-Comments.csv && \
+diff -qs GOLDEN_Alpha-Tables_Tables.csv Tables.csv && \
 ../aggregate.py rowtable.csv -w NewTable:Minutes:17077:32.62 | diff -qs GOLDEN_rowtable - && \
 diff -qs GOLDEN_rowtable_Attendees.csv Attendees.csv && \
 diff -qs GOLDEN_rowtable_Items.csv Items.csv && \
 diff -qs GOLDEN_rowtable_Minutes-Comments.csv Minutes-Comments.csv && \
+diff -qs GOLDEN_rowtable_Tables.csv Tables.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Underlining | diff -qs GOLDEN_Lines - && \
 diff -qs GOLDEN_Lines.csv Lines.csv && \
 ! ../aggregate.py test.csv >/dev/null && \

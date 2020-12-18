@@ -223,7 +223,7 @@ def proc_index_names(page_data, annotations, index_name, index_other):
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
-def proc_tables_alpha(task, value):
+def proc_tables_alpha(page_data, task, value, tables):
   TABLE_FIRST_COMBO = 'T25'
   TABLE_STANDARD_NUMBER = 'T23'
   TABLE_TITLE = 'T24'
@@ -236,13 +236,15 @@ def proc_tables_alpha(task, value):
   TABLE_MORE_ROWS = ['T39', 'T40', 'T41', 'T42', 'T43', 'T44', 'T45']
   TABLE_NEXT = 'T37'
 
+  page_number = page_data['page']
+
   if task == TABLE_FIRST_COMBO:
     proc_tables_alpha.counter += 1
+    proc_tables_alpha.item_number = get_value(TABLE_STANDARD_NUMBER, value[0])
 
-    item_number = get_value(TABLE_STANDARD_NUMBER, value[0])
-    title = get_value(TABLE_TITLE, value[1])
-    print(f"Table {proc_tables_alpha.counter} in item {item_number}")
-    print(f'\033[4m{title}\033[0m')
+    proc_tables_alpha.title = get_value(TABLE_TITLE, value[1])
+    print(f"Table {proc_tables_alpha.counter} in item {proc_tables_alpha.item_number}")
+    print(f'\033[4m{proc_tables_alpha.title}\033[0m')
     heading = get_value(TABLE_FIRST_HEADING, value[2])
     column = [get_value(x, y) for x, y in zip(TABLE_FIRST_ROWS, value[3:])] #This will match each task to the particular value
     proc_tables_alpha.table = [[f'*{heading}*']]
@@ -268,13 +270,17 @@ def proc_tables_alpha(task, value):
       for x in proc_tables_alpha.table:
         if len(x) < max_length: x.extend([None] * (max_length - len(x)))
 
-      #Transpose and print
-      for row in zip(*proc_tables_alpha.table): print(*row)
+      #Transpose, print and store
+      for i, row in enumerate(zip(*proc_tables_alpha.table)):
+        print(*row)
+        expanded_row = [*row]
+        expanded_row.extend([None] * (6 - len(row)))
+        tables.append([page_number, proc_tables_alpha.item_number, proc_tables_alpha.counter, proc_tables_alpha.title, i, *expanded_row]) #row 0 is the headings
       print()
     else: raise Exception(f'Bad value: {value}')
   else: exit(f'Unknown task: {task}\n{value}')
 
-def proc_tables(task, value):
+def proc_tables(page_data, task, value, tables):
   TABLE_HEADERS_COMBO = 'T25'
   TABLE_STANDARD_NUMBER = 'T23'
   TABLE_TITLE = 'T24'
@@ -284,35 +290,43 @@ def proc_tables(task, value):
   TABLE_NEXT = 'T37'
   OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
 
+  page_number = page_data['page']
+
   if task == TABLE_HEADERS_COMBO:
     proc_tables.counter += 1
+    proc_tables.row_number = 0
+    proc_tables.item_number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
+    proc_tables.title = get_value(TABLE_TITLE, value[2])
 
-    item_number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
-    title = get_value(TABLE_TITLE, value[2])
     headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
 
-    print(f"Table {proc_tables.counter} in item {item_number}")
-    print(f'\033[4m{title}\033[0m')
+    print(f"Table {proc_tables.counter} in item {proc_tables.item_number}")
+    print(f'\033[4m{proc_tables.title}\033[0m')
     for x in headings:
       if len(x) == 0: break
       print(f'\033[4m{x}\033[0m', end = ',')
     print()
+    tables.append([page_number, proc_tables.item_number, proc_tables.counter, proc_tables.title, proc_tables.row_number, *headings]) #row 0 signifies the headings -- there may not be any, in which case those 6 cells will be empty
   elif task == TABLE_ENTRIES_COMBO:
+    proc_tables.row_number += 1
     cells = [get_value(x, y) for x, y in zip(TABLE_ROWS, value)]
     for x in cells:
       if len(x) == 0: break
       print(x, end = ',')
+      tables.append([page_number, proc_tables.item_number, proc_tables.counter, proc_tables.title, proc_tables.row_number, *cells])
     print()
   elif task == TABLE_NEXT:
     if value == 'Another row': None
-    elif value == 'Another table': print()
+    elif value == 'Another table':
+      print()
+      proc_tables.row_number = 0
     elif value[0:8] == 'Nothing:':
       proc_tables.counter = 0
       print()
     else: raise Exception('Bad value')
   else: exit(f'Unknown task: {task}\n{value}')
 
-def proc_minutes(table_function, page_data, annotations, attendees, items, comments):
+def proc_minutes(table_function, page_data, annotations, attendees, tables, items, comments):
   STANDARD_ATTENDEES = 'T9'
   OTHER_ATTENDEES = 'T3'
   STANDARD_AGENDA = 'T14'
@@ -374,7 +388,7 @@ def proc_minutes(table_function, page_data, annotations, attendees, items, comme
         print(f'Comments: {value}')
         comments.append([page_number, value])
     elif task in SKIP: continue
-    else: table_function(task, value)
+    else: table_function(page_data, task, value, tables)
 
 def proc_underlining(page, annotations, lines):
   UNDERLININGS = 'T0'
@@ -433,6 +447,7 @@ index_other = []
 index_name = []
 minutes_attendees = []
 minutes_items = []
+minutes_tables = []
 minutes_comments = []
 lines = []
 for workflow in workflow_list:
@@ -477,12 +492,12 @@ for workflow in workflow_list:
          (workflow_data['id'] == 16863 and workflow_data['version'] == 19.48):
         if control == 'Front page, with attendance list' or \
            control == 'Other page':
-          proc_minutes(proc_tables_alpha, page, annotations, minutes_attendees, minutes_items, minutes_comments)
+          proc_minutes(proc_tables_alpha, page, annotations, minutes_attendees, minutes_tables, minutes_items, minutes_comments)
         else: exit(f"Bad control switch for alpha workflows: \"{control}\"")
       else:
         if control == 'Front page, with attendance list' or \
            control == 'Another page of meeting minutes':
-          proc_minutes(proc_tables, page, annotations, minutes_attendees, minutes_items, minutes_comments)
+          proc_minutes(proc_tables, page, annotations, minutes_attendees, minutes_tables, minutes_items, minutes_comments)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.UNDERLINING:
@@ -505,6 +520,8 @@ pd.DataFrame(index_name, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surna
 #Minutes
 pd.DataFrame(minutes_attendees, columns = ['Page', 'Name']). \
   sort_values(['Page', 'Name']).to_csv(path_or_buf = 'Attendees.csv', index = False)
+pd.DataFrame(minutes_tables, columns = ['Page', 'Item', 'Table', 'Title', 'Row', 'Col1', 'Col2', 'Col3', 'Col4', 'Col5', 'Col6']). \
+  sort_values(['Page', 'Item', 'Table', 'Row']).to_csv(path_or_buf = 'Tables.csv', index = False)
 pd.DataFrame(minutes_items, columns = ['Page', 'Item', 'Title', 'Text', 'Resolution', 'Classification']). \
   sort_values(['Page', 'Item']).to_csv(path_or_buf = 'Items.csv', index = False)
 pd.DataFrame(minutes_comments, columns = ['Page', 'Comments']). \
