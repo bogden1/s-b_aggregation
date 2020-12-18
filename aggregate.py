@@ -247,12 +247,12 @@ def proc_tables_alpha(page_data, task, value, tables):
     print(f'\033[4m{proc_tables_alpha.title}\033[0m')
     heading = get_value(TABLE_FIRST_HEADING, value[2])
     column = [get_value(x, y) for x, y in zip(TABLE_FIRST_ROWS, value[3:])] #This will match each task to the particular value
-    proc_tables_alpha.table = [[f'*{heading}*']]
+    proc_tables_alpha.table = [[heading]]
     proc_tables_alpha.table[-1].extend(column)
   elif task == TABLE_ROWS_COMBO:
     heading = get_value(TABLE_ROWS_HEADING, value[0])
     column = [get_value(x, y) for x, y in zip(TABLE_ROWS, value[1:])]
-    proc_tables_alpha.table.append([f'*{heading}*'])
+    proc_tables_alpha.table.append([heading])
     proc_tables_alpha.table[-1].extend(column)
   elif task == TABLE_MORE_ROWS_COMBO:
     column = [get_value(x, y) for x, y in zip(TABLE_MORE_ROWS, value)]
@@ -272,7 +272,9 @@ def proc_tables_alpha(page_data, task, value, tables):
 
       #Transpose, print and store
       for i, row in enumerate(zip(*proc_tables_alpha.table)):
-        print(*row)
+        if i == 0: print(' '.join([f'*{x}*' for x in row]))
+        else: print(*row)
+
         expanded_row = [*row]
         expanded_row.extend([None] * (6 - len(row)))
         tables.append([page_number, proc_tables_alpha.item_number, proc_tables_alpha.counter, proc_tables_alpha.title, i, *expanded_row]) #row 0 is the headings
