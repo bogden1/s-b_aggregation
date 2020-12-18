@@ -6,6 +6,7 @@ diff -qs Names.csv GOLDEN_Alpha-Names_Names.csv && \
 diff -qs Comments.csv GOLDEN_Alpha-Names_Comments.csv && \
 ../aggregate.py scarlets-and-blues-classifications.csv -w Alpha-Index | diff -qs GOLDEN_Alpha-Index - && \
 diff -qs Index.csv GOLDEN_Alpha-Index_Index.csv && \
+diff -qs Names.csv GOLDEN_Alpha-Index_Names.csv && \
 diff -qs Comments.csv GOLDEN_Alpha-Index_Comments.csv && \
 ../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Minutes | diff -qs GOLDEN_Alpha_Minutes - && \
 diff -qs GOLDEN_Alpha-Minutes_Attendees.csv Attendees.csv && \
