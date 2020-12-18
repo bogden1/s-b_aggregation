@@ -50,8 +50,6 @@ WORKFLOWS = {
   }
 }
 
-pd.set_option('display.max_colwidth', None)
-
 #expected_tasks can be scalar or sequence
 #if a scalar, there is only one legal task for the annotation
 #if a sequence, any of the given tasks is legal for the annotation
@@ -262,7 +260,16 @@ def proc_tables_alpha(task, value):
     elif value == 'Another column': None
     elif value == 'Another table' or value[0:8] == 'Nothing ':
       if value[0:8] == 'Nothing ': proc_tables_alpha.counter = 0
-      print(pd.DataFrame(proc_tables_alpha.table).transpose())
+
+      #Normalise all columns to same length
+      max_length = len(proc_tables_alpha.table[0])
+      for x in proc_tables_alpha.table[1:]:
+        if len(x) > max_length: max_length = len(x)
+      for x in proc_tables_alpha.table:
+        if len(x) < max_length: x.extend([None] * (max_length - len(x)))
+
+      #Transpose and print
+      for row in zip(*proc_tables_alpha.table): print(*row)
       print()
     else: raise Exception(f'Bad value: {value}')
   else: exit(f'Unknown task: {task}\n{value}')
