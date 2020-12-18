@@ -11,9 +11,16 @@ from enum import Enum, unique
 import pandas as pd
 
 @unique
+class UnderlineType(Enum):
+  TITLE = 0
+  TEXT = 1
+  RESOLUTION = 2
+
+@unique
 class WorkflowType(Enum):
   INDEX = 1
   MINUTES = 2
+  UNDERLINING = 3
 
 WORKFLOWS = {
  'Alpha-Index': {
@@ -36,6 +43,11 @@ WORKFLOWS = {
     'id': 16863,
     'version': 19.48,
   },
+  'Alpha-Underlining': {
+    'type': WorkflowType.UNDERLINING,
+    'id': 16848,
+    'version': 18.65,
+  }
 }
 
 pd.set_option('display.max_colwidth', None)
@@ -367,6 +379,31 @@ def minutes_front(table_function, page_data, annotations, attendees, items, comm
   #2) Date, page, agenda item number, agenda item title, agenda item text, agenda item resolution
   #3) Date, page, comments - refactor the way I do comments for the index before implementing this one
 
+def underlining(page, annotations, lines):
+  SUITABLE = 'T1'
+  UNDERLININGS = 'T0'
+
+  page_number = page['page']
+  for annotation in annotations:
+    task = annotation['task']
+    value = annotation['value']
+    if task == SUITABLE: continue
+    elif task == UNDERLININGS:
+      underlinings = [[],[],[]]
+      for v in value:
+        underlinings[int(v['tool'])].append(((v['x1'], v['y1']), (v['x2'], v['y2'])))
+      print('Titles')
+      for line in underlinings[UnderlineType.TITLE.value]: print(line)
+      print('Texts')
+      for line in underlinings[UnderlineType.TEXT.value]: print(line)
+      print('Resolutions')
+      for line in underlinings[UnderlineType.RESOLUTION.value]: print(line)
+      for line_type in UnderlineType:
+        for line in underlinings[line_type.value]:
+          lines.append([page_number, line_type.name, *line[0], *line[1]])
+    else: exit(f'Unknown task: {task}\n{value}')
+
+
 #Examples:
 #./aggregate.py -w Alpha-Minutes Alpha-Tables NewTable:Minutes:17077:32.62
 #./aggregate.py testing/rowtable.csv -w NewTable:Minutes:17077:32.62
@@ -406,6 +443,7 @@ name_index = []
 minutes_attendees = []
 minutes_items = []
 minutes_comments = []
+lines = []
 for workflow in workflow_list:
   workflow_data = WORKFLOWS[workflow]
   workflow_type = workflow_data['type']
@@ -456,6 +494,8 @@ for workflow in workflow_list:
           minutes_front(tables, page, annotations, minutes_attendees, minutes_items, minutes_comments)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
+    elif workflow_type == WorkflowType.UNDERLINING:
+      underlining(page, annotations, lines)
     else:
       exit(f'Bad workflow type: "{workflow_type}"')
 
@@ -473,3 +513,7 @@ pd.DataFrame(minutes_items, columns = ['Page', 'Item', 'Title', 'Text', 'Resolut
 pd.DataFrame(minutes_comments, columns = ['Page', 'Comments']). \
   sort_values('Page').to_csv(path_or_buf = 'Minutes-Comments.csv', index = False)
 
+#Lines
+pd.DataFrame(lines, columns = ['Page', 'Type', 'x1', 'y1', 'x2', 'y2']). \
+  sort_values(['Page', 'Type'], key = lambda x: x if x.name == 'Page' else [UnderlineType[y].value for y in x]). \
+  to_csv(path_or_buf = 'Lines.csv', index = False)

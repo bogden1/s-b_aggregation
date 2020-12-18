@@ -17,6 +17,8 @@ diff -qs GOLDEN_Alpha-Tables_Minutes-Comments.csv Minutes-Comments.csv && \
 diff -qs GOLDEN_rowtable_Attendees.csv Attendees.csv && \
 diff -qs GOLDEN_rowtable_Items.csv Items.csv && \
 diff -qs GOLDEN_rowtable_Minutes-Comments.csv Minutes-Comments.csv && \
+../aggregate.py scarlets-and-blues-classifications2.csv -w Alpha-Underlining | diff -qs GOLDEN_Lines - && \
+diff -qs GOLDEN_Lines.csv Lines.csv && \
 ! ../aggregate.py test.csv >/dev/null && \
 ! ../aggregate.py test1.csv >/dev/null && \
 ! ../aggregate.py test2.csv >/dev/null && \
