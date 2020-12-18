@@ -110,7 +110,7 @@ def pageref_annotations(pagerefs):
   return output
 
 #TODO: Probably makes more sense to have a single index-processing function
-def proc_index_other(page_data, annotations, index_other):
+def proc_index_other(page_data, annotations, index_other, comments):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -128,7 +128,7 @@ def proc_index_other(page_data, annotations, index_other):
     if task == HEADING:
       print(value)
       if not heading_stored:
-        index_other.append([page_number, entry, heading, None, None, None, None])
+        index_other.append([page_number, entry, heading, None, None, None])
         entry += 1
       heading = value
       heading_stored = False
@@ -146,26 +146,26 @@ def proc_index_other(page_data, annotations, index_other):
           print(pagerefs)
           print()
           if pagerefs == '':
-            index_other.append([page_number, entry, heading, subject, '', '', ''])
+            index_other.append([page_number, entry, heading, subject, '', ''])
             entry += 1
           else:
             for pageref, annotation in pageref_annotations(pagerefs):
-              index_other.append([page_number, entry, heading, subject, pageref, annotation, None])
+              index_other.append([page_number, entry, heading, subject, pageref, annotation])
               entry += 1
           heading_stored = True
     elif task == COMMENTS:
       if not heading_stored:
-        index_other.append([page_number, entry, heading, None, None, None, None])
+        index_other.append([page_number, entry, heading, None, None, None])
         entry += 1
         heading_stored = True
       print(f'Comments: {value}')
-      index_other.append([page_number, entry, None, None, None, None, value])
+      comments.append([page_number, value])
       entry += 1
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
 #TODO: Probably makes more sense to have a single index-processing function
-def proc_index_names(page_data, annotations, index_name, index_other):
+def proc_index_names(page_data, annotations, index_name, index_other, comments):
   NAME_COMBO = 'T0'
   SURNAME = 'T1'
   TITLE_STANDARD = 'T8'
@@ -195,30 +195,19 @@ def proc_index_names(page_data, annotations, index_name, index_other):
             get_values(PAGES,             value[7::8])):
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pagerefs}')
         if pagerefs == '':
-          index_name.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
+          index_name.append([page_number, entry, title, forename, surname, position, subject, None, None])
           entry += 1
         else:
           for pageref, annotation in pageref_annotations(pagerefs):
-            index_name.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
+            index_name.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation])
             entry += 1
     elif task == COMMENTS:
       print(f'Comments: {value}')
-      index_name.append([page_number, entry, None, None, None, None, None, None, None, value])
       entry += 1
     elif task == HEADING:
-      #Make sure that we add any comment to this CSV, as well as the other one
-      #Note that COMMENT is the same in both functions, as they are processing data from the same page,
-      #so we will end up with the comment in both CSV files, which is what we want.
-      #TODO: it would be neater to do this in the loop that calls this function, at page level
-      #TODO: it should also always be the final task, so I likely do not need this loop -- but a moot point if I deal with the TODO above
-      for x in annotations:
-        if x['task'] == COMMENTS:
-          print(f'Comments: {x["value"]}')
-          index_name.append([page_number, entry, None, None, None, None, None, None, None, x['value']])
-
       print()
       annotations.insert(0, annotation)
-      proc_index_other(page_data, annotations, index_other)
+      proc_index_other(page_data, annotations, index_other, comments)
       break
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
@@ -478,9 +467,9 @@ for workflow in workflow_list:
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
     if workflow_type == WorkflowType.INDEX:
       if control == 'Other page':
-        proc_index_other(page, annotations, index_other)
+        proc_index_other(page, annotations, index_other, comments)
       elif control == 'Name list':
-        proc_index_names(page, annotations, index_name, index_other)
+        proc_index_names(page, annotations, index_name, index_other, comments)
       elif control == 'Blank page':
         print('*** BLANK ***') #TODO: Probably should make sure that Blank classifications are consistent
         continue
@@ -514,9 +503,9 @@ for workflow in workflow_list:
       exit(f'Bad workflow type: "{workflow_type}"')
 
 #Index
-pd.DataFrame(index_other, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+pd.DataFrame(index_other, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation']). \
   sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
-pd.DataFrame(index_name, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+pd.DataFrame(index_name, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation']). \
   sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
 
 #Minutes
