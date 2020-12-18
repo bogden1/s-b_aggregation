@@ -450,7 +450,7 @@ index_name = []
 minutes_attendees = []
 minutes_items = []
 minutes_tables = []
-minutes_comments = []
+comments = []
 lines = []
 for workflow in workflow_list:
   workflow_data = WORKFLOWS[workflow]
@@ -494,12 +494,12 @@ for workflow in workflow_list:
          (workflow_data['id'] == 16863 and workflow_data['version'] == 19.48):
         if control == 'Front page, with attendance list' or \
            control == 'Other page':
-          proc_minutes(proc_tables_alpha, page, annotations, minutes_attendees, minutes_tables, minutes_items, minutes_comments)
+          proc_minutes(proc_tables_alpha, page, annotations, minutes_attendees, minutes_tables, minutes_items, comments)
         else: exit(f"Bad control switch for alpha workflows: \"{control}\"")
       else:
         if control == 'Front page, with attendance list' or \
            control == 'Another page of meeting minutes':
-          proc_minutes(proc_tables, page, annotations, minutes_attendees, minutes_tables, minutes_items, minutes_comments)
+          proc_minutes(proc_tables, page, annotations, minutes_attendees, minutes_tables, minutes_items, comments)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.UNDERLINING:
@@ -526,8 +526,10 @@ pd.DataFrame(minutes_tables, columns = ['Page', 'Item', 'Table', 'Title', 'Row',
   sort_values(['Page', 'Item', 'Table', 'Row']).to_csv(path_or_buf = 'Tables.csv', index = False)
 pd.DataFrame(minutes_items, columns = ['Page', 'Item', 'Title', 'Text', 'Resolution', 'Classification']). \
   sort_values(['Page', 'Item']).to_csv(path_or_buf = 'Items.csv', index = False)
-pd.DataFrame(minutes_comments, columns = ['Page', 'Comments']). \
-  sort_values('Page').to_csv(path_or_buf = 'Minutes-Comments.csv', index = False)
+
+#Comments
+pd.DataFrame(comments, columns = ['Page', 'Comments']). \
+  sort_values('Page').to_csv(path_or_buf = 'Comments.csv', index = False)
 
 #Lines
 pd.DataFrame(lines, columns = ['Page', 'Type', 'x1', 'y1', 'x2', 'y2']). \
