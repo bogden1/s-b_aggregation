@@ -372,15 +372,13 @@ def proc_minutes(table_function, page_data, annotations, attendees, items, comme
     else: table_function(task, value)
 
 def proc_underlining(page, annotations, lines):
-  SUITABLE = 'T1'
   UNDERLININGS = 'T0'
 
   page_number = page['page']
   for annotation in annotations:
     task = annotation['task']
     value = annotation['value']
-    if task == SUITABLE: continue
-    elif task == UNDERLININGS:
+    if task == UNDERLININGS:
       underlinings = [[],[],[]]
       for v in value:
         underlinings[int(v['tool'])].append(((v['x1'], v['y1']), (v['x2'], v['y2'])))
@@ -483,7 +481,13 @@ for workflow in workflow_list:
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.UNDERLINING:
-      proc_underlining(page, annotations, lines)
+      if control == 'Yes, this page is suitable for underlining.':
+        proc_underlining(page, annotations, lines)
+      elif control == 'No, this page is not suitable for underlining.':
+        print('*** UNSUITABLE ***') #TODO: Probably should make sure that Unsuitable classifications are consistent
+      elif (workflow_data['id'] == 16848 and workflow_data['version'] < 19.81) and control == None:
+        print('*** UNSUITABLE ***') #In the Alpha workflow, the first question was not flagged required and so this could be None
+      else: exit(f'Bad control switch: "{control}"')
     else:
       exit(f'Bad workflow type: "{workflow_type}"')
 
