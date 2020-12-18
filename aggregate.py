@@ -260,11 +260,8 @@ def proc_tables_alpha(task, value):
   elif task == TABLE_NEXT:
     if value == 'More rows in this column': None
     elif value == 'Another column': None
-    elif value == 'Another table':
-      print(pd.DataFrame(proc_tables_alpha.table).transpose())
-      print()
-    elif value[0:8] == 'Nothing ':
-      proc_tables_alpha.counter = 0
+    elif value == 'Another table' or value[0:8] == 'Nothing ':
+      if value[0:8] == 'Nothing ': proc_tables_alpha.counter = 0
       print(pd.DataFrame(proc_tables_alpha.table).transpose())
       print()
     else: raise Exception(f'Bad value: {value}')
