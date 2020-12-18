@@ -111,7 +111,8 @@ def pageref_annotations(pagerefs):
     exit(f'Bad pagerefs string: "{pageref}"')
   return output
 
-def index_other(page_data, annotations, other_index):
+#TODO: Probably makes more sense to have a single index-processing function
+def proc_index_other(page_data, annotations, index_other):
   HEADING = 'T12'
   SUBJECT_PAGES = 'T11'
   SUBJECT = ['T13', 'T16', 'T18']
@@ -129,7 +130,7 @@ def index_other(page_data, annotations, other_index):
     if task == HEADING:
       print(value)
       if not heading_stored:
-        other_index.append([page_number, entry, heading, None, None, None, None])
+        index_other.append([page_number, entry, heading, None, None, None, None])
         entry += 1
       heading = value
       heading_stored = False
@@ -147,26 +148,26 @@ def index_other(page_data, annotations, other_index):
           print(pagerefs)
           print()
           if pagerefs == '':
-            other_index.append([page_number, entry, heading, subject, '', '', ''])
+            index_other.append([page_number, entry, heading, subject, '', '', ''])
             entry += 1
           else:
             for pageref, annotation in pageref_annotations(pagerefs):
-              other_index.append([page_number, entry, heading, subject, pageref, annotation, None])
+              index_other.append([page_number, entry, heading, subject, pageref, annotation, None])
               entry += 1
           heading_stored = True
     elif task == COMMENTS:
       if not heading_stored:
-        other_index.append([page_number, entry, heading, None, None, None, None])
+        index_other.append([page_number, entry, heading, None, None, None, None])
         entry += 1
         heading_stored = True
       print(f'Comments: {value}')
-      other_index.append([page_number, entry, None, None, None, None, value])
+      index_other.append([page_number, entry, None, None, None, None, value])
       entry += 1
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
-
-def index_names(page_data, annotations, name_index, other_index):
+#TODO: Probably makes more sense to have a single index-processing function
+def proc_index_names(page_data, annotations, index_name, index_other):
   NAME_COMBO = 'T0'
   SURNAME = 'T1'
   TITLE_STANDARD = 'T8'
@@ -196,15 +197,15 @@ def index_names(page_data, annotations, name_index, other_index):
             get_values(PAGES,             value[7::8])):
         print(f'{title} {forename} {surname}, {position}    {subject} >>> {pagerefs}')
         if pagerefs == '':
-          name_index.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
+          index_name.append([page_number, entry, title, forename, surname, position, subject, None, None, None])
           entry += 1
         else:
           for pageref, annotation in pageref_annotations(pagerefs):
-            name_index.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
+            index_name.append([page_number, entry, title, forename, surname, position, subject, pageref, annotation, None])
             entry += 1
     elif task == COMMENTS:
       print(f'Comments: {value}')
-      name_index.append([page_number, entry, None, None, None, None, None, None, None, value])
+      index_name.append([page_number, entry, None, None, None, None, None, None, None, value])
       entry += 1
     elif task == HEADING:
       #Make sure that we add any comment to this CSV, as well as the other one
@@ -215,16 +216,16 @@ def index_names(page_data, annotations, name_index, other_index):
       for x in annotations:
         if x['task'] == COMMENTS:
           print(f'Comments: {x["value"]}')
-          name_index.append([page_number, entry, None, None, None, None, None, None, None, x['value']])
+          index_name.append([page_number, entry, None, None, None, None, None, None, None, x['value']])
 
       print()
       annotations.insert(0, annotation)
-      index_other(page_data, annotations, other_index)
+      proc_index_other(page_data, annotations, index_other)
       break
     elif task == SKIP: continue
     else: exit(f'Unknown task: {task}\n{value}')
 
-def tables_alpha(task, value):
+def proc_tables_alpha(task, value):
   TABLE_FIRST_COMBO = 'T25'
   TABLE_STANDARD_NUMBER = 'T23'
   TABLE_TITLE = 'T24'
@@ -238,42 +239,38 @@ def tables_alpha(task, value):
   TABLE_NEXT = 'T37'
 
   if task == TABLE_FIRST_COMBO:
-    tables_alpha.counter += 1
+    proc_tables_alpha.counter += 1
 
-    number = get_value(TABLE_STANDARD_NUMBER, value[0])
+    item_number = get_value(TABLE_STANDARD_NUMBER, value[0])
     title = get_value(TABLE_TITLE, value[1])
-    print(f"Table {tables_alpha.counter} in item {number}")
+    print(f"Table {proc_tables_alpha.counter} in item {item_number}")
     print(f'\033[4m{title}\033[0m')
     heading = get_value(TABLE_FIRST_HEADING, value[2])
     column = [get_value(x, y) for x, y in zip(TABLE_FIRST_ROWS, value[3:])] #This will match each task to the particular value
-    tables_alpha.table = [[f'*{heading}*']]
-    tables_alpha.table[-1].extend(column)
-    #print(f'Init: {pd.DataFrame(tables_alpha.table)}')
+    proc_tables_alpha.table = [[f'*{heading}*']]
+    proc_tables_alpha.table[-1].extend(column)
   elif task == TABLE_ROWS_COMBO:
     heading = get_value(TABLE_ROWS_HEADING, value[0])
     column = [get_value(x, y) for x, y in zip(TABLE_ROWS, value[1:])]
-    tables_alpha.table.append([f'*{heading}*'])
-    tables_alpha.table[-1].extend(column)
-    #print(f'Append: {pd.DataFrame(tables_alpha.table)}')
+    proc_tables_alpha.table.append([f'*{heading}*'])
+    proc_tables_alpha.table[-1].extend(column)
   elif task == TABLE_MORE_ROWS_COMBO:
     column = [get_value(x, y) for x, y in zip(TABLE_MORE_ROWS, value)]
-    #print(f'Extend1: {pd.DataFrame(tables_alpha.table)}')
-    tables_alpha.table[-1].extend(column)
-    #print(f'Extend2: {pd.DataFrame(tables_alpha.table)}')
+    proc_tables_alpha.table[-1].extend(column)
   elif task == TABLE_NEXT:
     if value == 'More rows in this column': None
     elif value == 'Another column': None
     elif value == 'Another table':
-      print(pd.DataFrame(tables_alpha.table).transpose())
+      print(pd.DataFrame(proc_tables_alpha.table).transpose())
       print()
     elif value[0:8] == 'Nothing ':
-      tables_alpha.counter = 0
-      print(pd.DataFrame(tables_alpha.table).transpose())
+      proc_tables_alpha.counter = 0
+      print(pd.DataFrame(proc_tables_alpha.table).transpose())
       print()
     else: raise Exception(f'Bad value: {value}')
   else: exit(f'Unknown task: {task}\n{value}')
 
-def tables(task, value):
+def proc_tables(task, value):
   TABLE_HEADERS_COMBO = 'T25'
   TABLE_STANDARD_NUMBER = 'T23'
   TABLE_TITLE = 'T24'
@@ -284,13 +281,13 @@ def tables(task, value):
   OTHER_NUMBER = 'T54' #Same task serves for both alternative agenda item number in both table and item contexts
 
   if task == TABLE_HEADERS_COMBO:
-    tables.counter += 1
+    proc_tables.counter += 1
 
-    number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
+    item_number = get_dropdown_textbox_value(TABLE_STANDARD_NUMBER, value[0], OTHER_NUMBER, value[1])
     title = get_value(TABLE_TITLE, value[2])
     headings = [get_value(x, y) for x, y in zip(TABLE_COL_HEAD, value[3:])] #This will match each task to the particular value
 
-    print(f"Table {tables.counter} in item {number}")
+    print(f"Table {proc_tables.counter} in item {item_number}")
     for x in headings:
       if len(x) == 0: break
       print(f'\033[4m{x}\033[0m', end = ',')
@@ -305,12 +302,12 @@ def tables(task, value):
     if value == 'Another row': None
     elif value == 'Another table': print()
     elif value[0:8] == 'Nothing:':
-      tables.counter = 0
+      proc_tables.counter = 0
       print()
     else: raise Exception('Bad value')
   else: exit(f'Unknown task: {task}\n{value}')
 
-def minutes_front(table_function, page_data, annotations, attendees, items, comments):
+def proc_minutes(table_function, page_data, annotations, attendees, items, comments):
   STANDARD_ATTENDEES = 'T9'
   OTHER_ATTENDEES = 'T3'
   STANDARD_AGENDA = 'T14'
@@ -374,12 +371,7 @@ def minutes_front(table_function, page_data, annotations, attendees, items, comm
     elif task in SKIP: continue
     else: table_function(task, value)
 
-  #Return multiple dataframes
-  #1) Date, page, attendee (one row for each attendee)
-  #2) Date, page, agenda item number, agenda item title, agenda item text, agenda item resolution
-  #3) Date, page, comments - refactor the way I do comments for the index before implementing this one
-
-def underlining(page, annotations, lines):
+def proc_underlining(page, annotations, lines):
   SUITABLE = 'T1'
   UNDERLININGS = 'T0'
 
@@ -403,10 +395,6 @@ def underlining(page, annotations, lines):
           lines.append([page_number, line_type.name, *line[0], *line[1]])
     else: exit(f'Unknown task: {task}\n{value}')
 
-
-#Examples:
-#./aggregate.py -w Alpha-Minutes Alpha-Tables NewTable:Minutes:17077:32.62
-#./aggregate.py testing/rowtable.csv -w NewTable:Minutes:17077:32.62
 
 parser = argparse.ArgumentParser(
   description='''Aggregate data from S&B workflows''',
@@ -438,8 +426,8 @@ if len(workflow_list) == 0: workflow_list = WORKFLOWS.keys()
 
 classifications = pd.read_csv(args.classifications)
 
-other_index = []
-name_index = []
+index_other = []
+index_name = []
 minutes_attendees = []
 minutes_items = []
 minutes_comments = []
@@ -470,39 +458,39 @@ for workflow in workflow_list:
     control = annotations.pop(0)['value'] #Our workflows all start with a control flow question
     if workflow_type == WorkflowType.INDEX:
       if control == 'Other page':
-        index_other(page, annotations, other_index)
+        proc_index_other(page, annotations, index_other)
       elif control == 'Name list':
-        index_names(page, annotations, name_index, other_index)
+        proc_index_names(page, annotations, index_name, index_other)
       elif control == 'Blank page':
-        print('*** BLANK ***')
+        print('*** BLANK ***') #TODO: Probably should make sure that Blank classifications are consistent
         continue
       else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.MINUTES:
       if control == 'Blank page':
-        print('*** BLANK ***')
+        print('*** BLANK ***') #TODO: Probably should make sure that Blank classifications are consistent
         continue
       if (workflow_data['id'] == 16890 and workflow_data['version'] == 4.9) or \
          (workflow_data['id'] == 16863 and workflow_data['version'] == 19.48):
         if control == 'Front page, with attendance list' or \
            control == 'Other page':
-          minutes_front(tables_alpha, page, annotations, minutes_attendees, minutes_items, minutes_comments)
+          proc_minutes(proc_tables_alpha, page, annotations, minutes_attendees, minutes_items, minutes_comments)
         else: exit(f"Bad control switch for alpha workflows: \"{control}\"")
       else:
         if control == 'Front page, with attendance list' or \
            control == 'Another page of meeting minutes':
-          minutes_front(tables, page, annotations, minutes_attendees, minutes_items, minutes_comments)
+          proc_minutes(proc_tables, page, annotations, minutes_attendees, minutes_items, minutes_comments)
         else: exit(f"Bad control switch: \"{control}\"")
       print()
     elif workflow_type == WorkflowType.UNDERLINING:
-      underlining(page, annotations, lines)
+      proc_underlining(page, annotations, lines)
     else:
       exit(f'Bad workflow type: "{workflow_type}"')
 
 #Index
-pd.DataFrame(other_index, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+pd.DataFrame(index_other, columns = ['Page', 'Entry', 'Heading', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
   sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Index.csv', index = False)
-pd.DataFrame(name_index, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
+pd.DataFrame(index_name, columns = ['Page', 'Entry', 'Title', 'Forename', 'Surname', 'Position', 'Subject', 'PageRef', 'Annotation', 'Comments']). \
   sort_values(['Page', 'Entry']).to_csv(path_or_buf = f'Names.csv', index = False)
 
 #Minutes
